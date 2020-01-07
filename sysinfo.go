@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	hl "gitlab.com/mjwhitta/hilighter"
+	"gitlab.com/mjwhitta/pathname"
 	"gitlab.com/mjwhitta/where"
 )
 
@@ -146,17 +147,35 @@ func (s *SysInfo) cpu() string {
 func (s *SysInfo) filesystems() []string {
 	var out = []string{}
 
-	// TODO filesystems
-
-	if len(s.HomeFS) > 0 {
-		out = append(out, s.HomeFS)
-	}
+	s.RootFS = s.fsUsage("/")
+	s.HomeFS = s.fsUsage("/home")
 
 	if len(s.RootFS) > 0 {
 		out = append(out, s.RootFS)
 	}
 
+	if (len(s.HomeFS) > 0) && (s.HomeFS != s.RootFS) {
+		out = append(out, s.HomeFS)
+	}
+
 	return out
+}
+
+func (s *SysInfo) fsUsage(path string) string {
+	var matches [][]string
+	var r *regexp.Regexp
+	var usage string
+
+	usage = s.exec("df", "-h", path)
+
+	r = regexp.MustCompile(`/\S+\s+(\S+)\s+(\S+)\s+\S+\s+(\S+)`)
+	matches = r.FindAllStringSubmatch(usage, -1)
+	for _, match := range matches {
+		return match[2] + " / " + match[1] + " (" + match[3] + ")"
+		break
+	}
+
+	return ""
 }
 
 func (s *SysInfo) hostname() string {
@@ -225,12 +244,40 @@ func (s *SysInfo) kernel() string {
 }
 
 func (s *SysInfo) operatingSystem() string {
-	// TODO os
+	var e error
+	var matches [][]string
+	var r *regexp.Regexp
+	var release []byte
+
+	if pathname.DoesExist("/etc/os-release") {
+		if release, e = ioutil.ReadFile("/etc/os-release"); e != nil {
+			panic(e)
+		}
+
+		r = regexp.MustCompile(`PRETTY_NAME="(.+)"`)
+		matches = r.FindAllStringSubmatch(string(release), -1)
+		for _, match := range matches {
+			s.OS = match[1] + " " + s.exec("uname", "-m")
+			break
+		}
+	} else {
+		s.OS = s.exec("uname", "-m", "-s")
+	}
+
 	return s.OS
 }
 
 func (s *SysInfo) ram() string {
-	// TODO ram
+	var matches [][]string
+	var r *regexp.Regexp
+
+	r = regexp.MustCompile(`Mem:\s+(\d+)\s+(\d+)`)
+	matches = r.FindAllStringSubmatch(s.exec("free", "-m"), -1)
+	for _, match := range matches {
+		s.RAM = match[2] + " MB / " + match[1] + " MB"
+		break
+	}
+
 	return s.RAM
 }
 
@@ -254,6 +301,27 @@ func (s *SysInfo) tty() string {
 }
 
 func (s *SysInfo) uptime() string {
-	// TODO uptime
+	var r *regexp.Regexp
+
+	s.Uptime = s.exec("uptime", "")
+
+	r = regexp.MustCompile(`^.+up\s+|,\s+\d+\s+user.+$`)
+	s.Uptime = r.ReplaceAllString(s.Uptime, "")
+
+	r = regexp.MustCompile(`(days?),\s+`)
+	s.Uptime = r.ReplaceAllString(s.Uptime, "$1, ")
+
+	r = regexp.MustCompile(`0?(\d+):0?(\d+)`)
+	s.Uptime = r.ReplaceAllString(s.Uptime, "$1 hour, $2 min")
+
+	r = regexp.MustCompile(`(0 hour, |, 0 min)`)
+	s.Uptime = r.ReplaceAllString(s.Uptime, "")
+
+	r = regexp.MustCompile(`((\d\d+|[2-9]) (hour|min))`)
+	s.Uptime = r.ReplaceAllString(s.Uptime, "${1}s")
+
+	r = regexp.MustCompile(`\s+`)
+	s.Uptime = r.ReplaceAllString(s.Uptime, " ")
+
 	return s.Uptime
 }
