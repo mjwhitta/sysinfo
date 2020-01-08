@@ -50,5 +50,5 @@ func main() {
 		os.Exit(Good)
 	}
 
-	hl.Printf("%+v\n", sysinfo.New())
+	hl.Println(sysinfo.New())
 }

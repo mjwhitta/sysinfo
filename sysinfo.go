@@ -1,6 +1,8 @@
 package sysinfo
 
 import (
+	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -14,20 +16,20 @@ import (
 
 // SysInfo is a struct contained relevant system information.
 type SysInfo struct {
-	Colors   string
-	CPU      string
-	HomeFS   string
-	Hostname string
-	IPv4     string
-	IPv6     string
-	Kernel   string
-	order    []string
-	OS       string
-	RAM      string
-	RootFS   string
-	Shell    string
-	TTY      string
-	Uptime   string
+	Colors string   `json:"-"`
+	CPU    string   `json:"CPU,omitempty"`
+	HomeFS string   `json:"HomeFS,omitempty"`
+	Host   string   `json:"Host,omitempty"`
+	IPv4   string   `json:"IPv4,omitempty"`
+	IPv6   string   `json:"IPv6,omitempty"`
+	Kernel string   `json:"Kernel,omitempty"`
+	order  []string `json:"-"`
+	OS     string   `json:"OS,omitempty"`
+	RAM    string   `json:"RAM,omitempty"`
+	RootFS string   `json:"RootFS,omitempty"`
+	Shell  string   `json:"Shell,omitempty"`
+	TTY    string   `json:"TTY,omitempty"`
+	Uptime string   `json:"Uptime,omitempty"`
 }
 
 // New will return a SysInfo pointer. A list of fields can be
@@ -38,69 +40,55 @@ func New(fields ...string) *SysInfo {
 	s.order = fields
 	if len(fields) == 0 {
 		s.order = []string{
-			"hostname",
-			"os",
-			"kernel",
-			"uptime",
-			"ip",
-			"shell",
-			"tty",
-			"cpu",
-			"ram",
-			"fs",
-			"colors",
+			"Host",
+			"OS",
+			"Kernel",
+			"Uptime",
+			"IP",
+			"Shell",
+			"TTY",
+			"CPU",
+			"RAM",
+			"FS",
+			"Colors",
 		}
 	}
 
 	for _, field := range s.order {
 		switch field {
-		case "colors":
+		case "Colors":
 			s.colors()
-		case "cpu":
+		case "CPU":
 			s.cpu()
-		case "fs":
+		case "FS":
 			s.filesystems()
-		case "host", "hostname":
+		case "Host":
 			s.hostname()
-		case "ip":
+		case "IP":
 			s.ipv4()
 			s.ipv6()
-		case "ipv4":
+		case "IPv4":
 			s.ipv4()
-		case "ipv6":
+		case "IPv6":
 			s.ipv6()
-		case "kernel":
+		case "Kernel":
 			s.kernel()
-		case "os":
+		case "OS":
 			s.operatingSystem()
-		case "ram":
+		case "RAM":
 			s.ram()
-		case "shell":
+		case "Shell":
 			s.shell()
-		case "tty":
+		case "TTY":
 			s.tty()
-		case "uptime":
+		case "Uptime":
 			s.uptime()
+		default:
+			panic(errors.New("Invalid field: " + field))
 		}
 	}
 
 	return s
-}
-
-func (s *SysInfo) exec(cmd string, cli ...string) string {
-	var e error
-	var o []byte
-
-	if len(cmd) == 0 || len(where.Is(cmd)) == 0 {
-		return ""
-	}
-
-	if o, e = exec.Command(cmd, cli...).Output(); e != nil {
-		// return e.Error()
-		panic(e)
-	}
-
-	return strings.TrimSpace(string(o))
 }
 
 func (s *SysInfo) colors() string {
@@ -144,6 +132,22 @@ func (s *SysInfo) cpu() string {
 	return s.CPU
 }
 
+func (s *SysInfo) exec(cmd string, cli ...string) string {
+	var e error
+	var o []byte
+
+	if len(cmd) == 0 || len(where.Is(cmd)) == 0 {
+		return ""
+	}
+
+	if o, e = exec.Command(cmd, cli...).Output(); e != nil {
+		// return e.Error()
+		panic(e)
+	}
+
+	return strings.TrimSpace(string(o))
+}
+
 func (s *SysInfo) filesystems() []string {
 	var out = []string{}
 
@@ -156,9 +160,24 @@ func (s *SysInfo) filesystems() []string {
 
 	if (len(s.HomeFS) > 0) && (s.HomeFS != s.RootFS) {
 		out = append(out, s.HomeFS)
+	} else {
+		s.HomeFS = ""
 	}
 
 	return out
+}
+
+func formatLine(k string, v string, max int) string {
+	var line string
+    var r = regexp.MustCompile(`%`)
+
+	line = " "
+	for i := 0; i < max-len(k); i++ {
+		line += " "
+	}
+	line += hl.Blue(k) + ": " + hl.White(r.ReplaceAllString(v, "%%"))
+
+	return line
 }
 
 func (s *SysInfo) fsUsage(path string) string {
@@ -179,8 +198,8 @@ func (s *SysInfo) fsUsage(path string) string {
 }
 
 func (s *SysInfo) hostname() string {
-	s.Hostname = s.exec("hostname", "-s")
-	return s.Hostname
+	s.Host = s.exec("hostname", "-s")
+	return s.Host
 }
 
 func (s *SysInfo) ipv4() string {
@@ -290,6 +309,62 @@ func (s *SysInfo) shell() string {
 	}
 
 	return s.Shell
+}
+
+// String will convert the SysInfo struct to a printable string.
+func (s *SysInfo) String() string {
+	var data = map[string]string{}
+	var e error
+	var hasKey bool
+	var max int
+	var out []string
+	var tmp []byte
+
+	if tmp, e = json.Marshal(s); e != nil {
+		panic(e)
+	}
+
+	if e = json.Unmarshal(tmp, &data); e != nil {
+		panic(e)
+	}
+
+	for k, _ := range data {
+		if len(k) > max {
+			max = len(k)
+		}
+	}
+
+	for _, field := range s.order {
+		switch field {
+		case "Colors":
+			out = append(out, "")
+			out = append(out, " "+s.Colors)
+		case "FS":
+			field = "RootFS"
+			if _, hasKey = data[field]; hasKey {
+				out = append(out, formatLine(field, data[field], max))
+			}
+
+			field = "HomeFS"
+			if _, hasKey = data[field]; hasKey {
+				out = append(out, formatLine(field, data[field], max))
+			}
+		case "IP":
+			field = "IPv4"
+			if _, hasKey = data[field]; hasKey {
+				out = append(out, formatLine(field, data[field], max))
+			}
+
+			field = "IPv6"
+			if _, hasKey = data[field]; hasKey {
+				out = append(out, formatLine(field, data[field], max))
+			}
+		default:
+			out = append(out, formatLine(field, data[field], max))
+		}
+	}
+
+	return strings.Join(out, "\n")
 }
 
 func (s *SysInfo) tty() string {
