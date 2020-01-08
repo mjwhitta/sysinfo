@@ -35,7 +35,7 @@ import (
 )
 
 func main() {
-	fmt.Printf("%+v\n", sysinfo.New())
+	fmt.Println(sysinfo.New())
 }
 ```
 
