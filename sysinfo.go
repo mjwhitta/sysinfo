@@ -18,6 +18,7 @@ import (
 type SysInfo struct {
 	Colors string   `json:"-"`
 	CPU    string   `json:"CPU,omitempty"`
+	Height int      `json:"-"`
 	HomeFS string   `json:"HomeFS,omitempty"`
 	Host   string   `json:"Host,omitempty"`
 	IPv4   string   `json:"IPv4,omitempty"`
@@ -30,6 +31,7 @@ type SysInfo struct {
 	Shell  string   `json:"Shell,omitempty"`
 	TTY    string   `json:"TTY,omitempty"`
 	Uptime string   `json:"Uptime,omitempty"`
+	Width  int      `json:"-"`
 }
 
 // New will return a SysInfo pointer. A list of fields can be
@@ -85,6 +87,13 @@ func New(fields ...string) *SysInfo {
 			s.uptime()
 		default:
 			panic(errors.New("Invalid field: " + field))
+		}
+	}
+
+	for _, line := range strings.Split(hl.Plain(s.String()), "\n") {
+		s.Height++
+		if len([]rune(line)) > s.Width {
+			s.Width = len([]rune(line))
 		}
 	}
 
@@ -169,7 +178,7 @@ func (s *SysInfo) filesystems() []string {
 
 func formatLine(k string, v string, max int) string {
 	var line string
-    var r = regexp.MustCompile(`%`)
+	var r = regexp.MustCompile(`%`)
 
 	line = " "
 	for i := 0; i < max-len(k); i++ {
