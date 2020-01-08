@@ -14,7 +14,7 @@ import (
 	"gitlab.com/mjwhitta/where"
 )
 
-// SysInfo is a struct contained relevant system information.
+// SysInfo is a struct containing relevant system information.
 type SysInfo struct {
 	Colors string   `json:"-"`
 	CPU    string   `json:"CPU,omitempty"`
@@ -328,7 +328,7 @@ func (s *SysInfo) String() string {
 		panic(e)
 	}
 
-	for k, _ := range data {
+	for k := range data {
 		if len(k) > max {
 			max = len(k)
 		}
