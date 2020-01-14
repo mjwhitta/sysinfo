@@ -129,9 +129,9 @@ func (s *SysInfo) cpu() string {
 		panic(e)
 	}
 
-	r = regexp.MustCompile(`name\s+:\s+(.+)`)
+	r = regexp.MustCompile(`(cpu model|model name)\s+:\s+(.+)`)
 	for _, match := range r.FindAllStringSubmatch(string(info), -1) {
-		s.CPU = match[1]
+		s.CPU = match[2]
 		break
 	}
 
@@ -151,7 +151,8 @@ func (s *SysInfo) exec(cmd string, cli ...string) string {
 
 	if o, e = exec.Command(cmd, cli...).Output(); e != nil {
 		// return e.Error()
-		panic(e)
+		return ""
+		// panic(e)
 	}
 
 	return strings.TrimSpace(string(o))
@@ -207,7 +208,14 @@ func (s *SysInfo) fsUsage(path string) string {
 }
 
 func (s *SysInfo) hostname() string {
-	s.Host = s.exec("hostname", "-s")
+	var e error
+	var host []byte
+
+	host, e = ioutil.ReadFile("/proc/sys/kernel/hostname")
+	if e == nil {
+		s.Host = strings.TrimSpace(string(host))
+	}
+
 	return s.Host
 }
 
@@ -217,10 +225,9 @@ func (s *SysInfo) ipv4() string {
 	var r *regexp.Regexp
 
 	r = regexp.MustCompile(`^default.+dev\s+(\S+)`)
-	matches = r.FindAllStringSubmatch(s.exec("ip", "r"), -1)
+	matches = r.FindAllStringSubmatch(s.exec("ip", "-o", "r"), -1)
 	for _, match := range matches {
 		dev = match[1]
-		break
 	}
 
 	r = regexp.MustCompile(`(?i)\s+inet\s+(\S+)`)
