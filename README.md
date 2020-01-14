@@ -39,6 +39,22 @@ func main() {
 }
 ```
 
+## Configuration
+
+Configuration is stored in `$HOME/.config/sysinfo/rc`. The default
+config looks like:
+
+```
+{
+  "kbg": "on_default",
+  "kfg": "blue",
+  "vbg": "on_default",
+  "vfg": "green"
+}
+```
+
+These values can be changed to adjust the key/value bg/fg colors.
+
 ## Links
 
 - [Source](https://gitlab.com/mjwhitta/sysinfo)

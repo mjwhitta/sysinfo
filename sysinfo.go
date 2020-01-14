@@ -139,6 +139,9 @@ func (s *SysInfo) cpu() string {
 	r = regexp.MustCompile(`\((R|TM)\)| (@|CPU)`)
 	s.CPU = r.ReplaceAllString(s.CPU, "")
 
+	r = regexp.MustCompile(`\s+`)
+	s.CPU = r.ReplaceAllString(s.CPU, " ")
+
 	return s.CPU
 }
 
@@ -188,7 +191,16 @@ func formatLine(k string, v string, max int) string {
 	for i := 0; i < max-len(k); i++ {
 		line += " "
 	}
-	line += hl.Blue(k+":") + " " + hl.LightGreen(v)
+
+	line += hl.Hilights(
+		[]string{config.GetString("kbg"), config.GetString("kfg")},
+		k+":",
+	)
+	line += " "
+	line += hl.Hilights(
+		[]string{config.GetString("vbg"), config.GetString("vfg")},
+		v,
+	)
 
 	return line
 }
