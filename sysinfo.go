@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"strconv"
 	"strings"
 
 	hl "gitlab.com/mjwhitta/hilighter"
@@ -181,11 +182,13 @@ func formatLine(k string, v string, max int) string {
 	var line string
 	var r = regexp.MustCompile(`%`)
 
+	v = r.ReplaceAllString(v, "%%")
+
 	line = " "
 	for i := 0; i < max-len(k); i++ {
 		line += " "
 	}
-	line += hl.Blue(k) + ": " + hl.White(r.ReplaceAllString(v, "%%"))
+	line += hl.Blue(k+":") + " " + hl.LightGreen(v)
 
 	return line
 }
@@ -274,7 +277,14 @@ func (s *SysInfo) ipv6() string {
 }
 
 func (s *SysInfo) kernel() string {
-	s.Kernel = s.exec("uname", "-r")
+	var e error
+	var kernel []byte
+
+	kernel, e = ioutil.ReadFile("/proc/sys/kernel/osrelease")
+	if e == nil {
+		s.Kernel = strings.TrimSpace(string(kernel))
+	}
+
 	return s.Kernel
 }
 
@@ -305,11 +315,22 @@ func (s *SysInfo) operatingSystem() string {
 func (s *SysInfo) ram() string {
 	var matches [][]string
 	var r *regexp.Regexp
+	var total int
+	var used int
 
 	r = regexp.MustCompile(`Mem:\s+(\d+)\s+(\d+)`)
-	matches = r.FindAllStringSubmatch(s.exec("free", "-m"), -1)
+	matches = r.FindAllStringSubmatch(s.exec("free"), -1)
 	for _, match := range matches {
-		s.RAM = match[2] + " MB / " + match[1] + " MB"
+		total, _ = strconv.Atoi(match[1])
+		used, _ = strconv.Atoi(match[2])
+
+		total /= 1024
+		used /= 1024
+
+		s.RAM = strconv.Itoa(used) + " MB"
+		s.RAM += " / "
+		s.RAM += strconv.Itoa(total) + " MB"
+
 		break
 	}
 
@@ -394,7 +415,7 @@ func (s *SysInfo) tty() string {
 func (s *SysInfo) uptime() string {
 	var r *regexp.Regexp
 
-	s.Uptime = s.exec("uptime", "")
+	s.Uptime = s.exec("uptime")
 
 	r = regexp.MustCompile(`^.+up\s+|,\s+\d+\s+user.+$`)
 	s.Uptime = r.ReplaceAllString(s.Uptime, "")
