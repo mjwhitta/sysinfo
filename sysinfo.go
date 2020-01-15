@@ -183,9 +183,6 @@ func (s *SysInfo) filesystems() []string {
 
 func formatLine(k string, v string, max int) string {
 	var line string
-	var r = regexp.MustCompile(`%`)
-
-	v = r.ReplaceAllString(v, "%%")
 
 	line = " "
 	for i := 0; i < max-len(k); i++ {
@@ -206,17 +203,16 @@ func formatLine(k string, v string, max int) string {
 }
 
 func (s *SysInfo) fsUsage(path string) string {
-	var matches [][]string
-	var r *regexp.Regexp
 	var usage string
+	var words []string
 
 	usage = s.exec("df", "-h", path)
 
-	r = regexp.MustCompile(`/\S+\s+(\S+)\s+(\S+)\s+\S+\s+(\S+)`)
-	matches = r.FindAllStringSubmatch(usage, -1)
-	for _, match := range matches {
-		return match[2] + " / " + match[1] + " (" + match[3] + ")"
-		break
+	for _, line := range strings.Split(usage, "\n") {
+		words = strings.Fields(line)
+		if (len(words) == 6) && (words[5] == path) {
+			return words[2] + " / " + words[1] + " (" + words[4] + ")"
+		}
 	}
 
 	return ""
