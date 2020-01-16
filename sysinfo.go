@@ -382,8 +382,10 @@ func (s *SysInfo) String() string {
 	for _, field := range s.order {
 		switch field {
 		case "Colors":
-			out = append(out, "")
-			out = append(out, " "+s.Colors)
+			if len(s.Colors) > 0 {
+				out = append(out, "")
+				out = append(out, " "+s.Colors)
+			}
 		case "FS":
 			field = "RootFS"
 			if _, hasKey = data[field]; hasKey {
@@ -405,7 +407,9 @@ func (s *SysInfo) String() string {
 				out = append(out, formatLine(field, data[field], max))
 			}
 		default:
-			out = append(out, formatLine(field, data[field], max))
+			if _, hasKey = data[field]; hasKey {
+				out = append(out, formatLine(field, data[field], max))
+			}
 		}
 	}
 
@@ -425,23 +429,34 @@ func (s *SysInfo) uptime() string {
 
 	s.Uptime = s.exec("uptime")
 
-	r = regexp.MustCompile(`^.+up\s+|,\s+\d+\s+user.+$`)
+	// Fail fast
+	if len(s.Uptime) == 0 {
+		return s.Uptime
+	}
+
+	// Strip extra whitespace
+	r = regexp.MustCompile(`\s+`)
+	s.Uptime = r.ReplaceAllString(s.Uptime, " ")
+
+	// Strip leading and trailing data
+	r = regexp.MustCompile(`^.*up\s+|,\s+\d+\s+user.+$`)
 	s.Uptime = r.ReplaceAllString(s.Uptime, "")
 
-	r = regexp.MustCompile(`(days?),\s+`)
-	s.Uptime = r.ReplaceAllString(s.Uptime, "$1, ")
-
+	// Convert hours:mins to match days
 	r = regexp.MustCompile(`0?(\d+):0?(\d+)`)
 	s.Uptime = r.ReplaceAllString(s.Uptime, "$1 hour, $2 min")
 
-	r = regexp.MustCompile(`(0 hour, |, 0 min)`)
+	// Remove 0 hours and mins
+	r = regexp.MustCompile(`(^|,\s+)0\s+(hour|min)`)
 	s.Uptime = r.ReplaceAllString(s.Uptime, "")
 
-	r = regexp.MustCompile(`((\d\d+|[2-9]) (hour|min))`)
+	// Make plural if needed
+	r = regexp.MustCompile(`((\d\d+|[2-9])\s+(hour|min))`)
 	s.Uptime = r.ReplaceAllString(s.Uptime, "${1}s")
 
-	r = regexp.MustCompile(`\s+`)
-	s.Uptime = r.ReplaceAllString(s.Uptime, " ")
+	// Remove leading and trailing commas or whitespace
+	r = regexp.MustCompile(`^(,?\s*)+|(,?\s*)+$`)
+	s.Uptime = r.ReplaceAllString(s.Uptime, "")
 
 	return s.Uptime
 }
