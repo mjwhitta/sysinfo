@@ -16,7 +16,7 @@ Or install from source:
 $ git clone https://gitlab.com/mjwhitta/sysinfo.git
 $ cd sysinfo
 $ make
-$ cp ./build/sysinfo ~/.local/bin/
+$ cp ./build/linux/amd64/sysinfo ~/.local/bin
 ```
 
 ## How to use
