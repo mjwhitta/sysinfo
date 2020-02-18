@@ -182,22 +182,20 @@ func (s *SysInfo) filesystems() []string {
 }
 
 func formatLine(k string, v string, max int) string {
+	var kbg, _ = config.GetString("kbg")
+	var kfg, _ = config.GetString("kfg")
 	var line string
+	var vbg, _ = config.GetString("vbg")
+	var vfg, _ = config.GetString("vfg")
 
 	line = " "
 	for i := 0; i < max-len(k); i++ {
 		line += " "
 	}
 
-	line += hl.Hilights(
-		[]string{config.GetString("kbg"), config.GetString("kfg")},
-		k+":",
-	)
+	line += hl.Hilights([]string{kbg, kfg}, k+":")
 	line += " "
-	line += hl.Hilights(
-		[]string{config.GetString("vbg"), config.GetString("vfg")},
-		v,
-	)
+	line += hl.Hilights([]string{vbg, vfg}, v)
 
 	return line
 }
