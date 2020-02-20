@@ -1,8 +1,6 @@
 package main
 
 import (
-	"os"
-
 	hl "gitlab.com/mjwhitta/hilighter"
 	"gitlab.com/mjwhitta/sysinfo"
 )
@@ -17,8 +15,6 @@ const (
 )
 
 func main() {
-	hl.Disable(flags.nocolor)
-
 	defer func() {
 		if r := recover(); r != nil {
 			if flags.verbose {
@@ -28,13 +24,19 @@ func main() {
 		}
 	}()
 
+	var dataColors []string
+	var fieldColors []string
+	var s *sysinfo.SysInfo
+
 	validate()
 
-	// Short circuit if version was requested
-	if flags.version {
-		hl.Printf("sysinfo version %s\n", sysinfo.Version)
-		os.Exit(Good)
-	}
+	s = sysinfo.New()
 
-	hl.Println(sysinfo.New())
+	dataColors, _ = config.GetStringArray("dataColors")
+	s.SetDataColors(dataColors...)
+
+	fieldColors, _ = config.GetStringArray("fieldColors")
+	s.SetFieldColors(fieldColors...)
+
+	hl.Println(s)
 }

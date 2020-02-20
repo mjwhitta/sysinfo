@@ -17,22 +17,24 @@ import (
 
 // SysInfo is a struct containing relevant system information.
 type SysInfo struct {
-	Colors string   `json:"-"`
-	CPU    string   `json:"CPU,omitempty"`
-	Height int      `json:"-"`
-	HomeFS string   `json:"HomeFS,omitempty"`
-	Host   string   `json:"Host,omitempty"`
-	IPv4   string   `json:"IPv4,omitempty"`
-	IPv6   string   `json:"IPv6,omitempty"`
-	Kernel string   `json:"Kernel,omitempty"`
-	order  []string `json:"-"`
-	OS     string   `json:"OS,omitempty"`
-	RAM    string   `json:"RAM,omitempty"`
-	RootFS string   `json:"RootFS,omitempty"`
-	Shell  string   `json:"Shell,omitempty"`
-	TTY    string   `json:"TTY,omitempty"`
-	Uptime string   `json:"Uptime,omitempty"`
-	Width  int      `json:"-"`
+	Colors      string   `json:"-"`
+	CPU         string   `json:"CPU,omitempty"`
+	dataColors  []string `json:"-"`
+	fieldColors []string `json:"-"`
+	Height      int      `json:"-"`
+	HomeFS      string   `json:"HomeFS,omitempty"`
+	Host        string   `json:"Host,omitempty"`
+	IPv4        string   `json:"IPv4,omitempty"`
+	IPv6        string   `json:"IPv6,omitempty"`
+	Kernel      string   `json:"Kernel,omitempty"`
+	order       []string `json:"-"`
+	OS          string   `json:"OS,omitempty"`
+	RAM         string   `json:"RAM,omitempty"`
+	RootFS      string   `json:"RootFS,omitempty"`
+	Shell       string   `json:"Shell,omitempty"`
+	TTY         string   `json:"TTY,omitempty"`
+	Uptime      string   `json:"Uptime,omitempty"`
+	Width       int      `json:"-"`
 }
 
 // New will return a SysInfo pointer. A list of fields can be
@@ -181,21 +183,17 @@ func (s *SysInfo) filesystems() []string {
 	return out
 }
 
-func formatLine(k string, v string, max int) string {
-	var kbg, _ = config.GetString("kbg")
-	var kfg, _ = config.GetString("kfg")
+func (s *SysInfo) format(k string, v string, max int) string {
 	var line string
-	var vbg, _ = config.GetString("vbg")
-	var vfg, _ = config.GetString("vfg")
 
 	line = " "
 	for i := 0; i < max-len(k); i++ {
 		line += " "
 	}
 
-	line += hl.Hilights([]string{kbg, kfg}, k+":")
+	line += hl.Hilights(s.fieldColors, k+":")
 	line += " "
-	line += hl.Hilights([]string{vbg, vfg}, v)
+	line += hl.Hilights(s.dataColors, v)
 
 	return line
 }
@@ -343,6 +341,18 @@ func (s *SysInfo) ram() string {
 	return s.RAM
 }
 
+// SetDataColors will set the color values for the field data. See
+// gitlab.com/mjwhitta/hilighter for valid colors.
+func (s *SysInfo) SetDataColors(colors ...string) {
+	s.dataColors = colors
+}
+
+// SetFieldColors will set the color values for the field names. See
+// gitlab.com/mjwhitta/hilighter for valid colors.
+func (s *SysInfo) SetFieldColors(colors ...string) {
+	s.fieldColors = colors
+}
+
 func (s *SysInfo) shell() string {
 	var exists bool
 	var sh string
@@ -387,26 +397,26 @@ func (s *SysInfo) String() string {
 		case "FS":
 			field = "RootFS"
 			if _, hasKey = data[field]; hasKey {
-				out = append(out, formatLine(field, data[field], max))
+				out = append(out, s.format(field, data[field], max))
 			}
 
 			field = "HomeFS"
 			if _, hasKey = data[field]; hasKey {
-				out = append(out, formatLine(field, data[field], max))
+				out = append(out, s.format(field, data[field], max))
 			}
 		case "IP":
 			field = "IPv4"
 			if _, hasKey = data[field]; hasKey {
-				out = append(out, formatLine(field, data[field], max))
+				out = append(out, s.format(field, data[field], max))
 			}
 
 			field = "IPv6"
 			if _, hasKey = data[field]; hasKey {
-				out = append(out, formatLine(field, data[field], max))
+				out = append(out, s.format(field, data[field], max))
 			}
 		default:
 			if _, hasKey = data[field]; hasKey {
-				out = append(out, formatLine(field, data[field], max))
+				out = append(out, s.format(field, data[field], max))
 			}
 		}
 	}

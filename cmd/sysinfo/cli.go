@@ -6,6 +6,7 @@ import (
 
 	"gitlab.com/mjwhitta/cli"
 	hl "gitlab.com/mjwhitta/hilighter"
+	"gitlab.com/mjwhitta/sysinfo"
 )
 
 // Flags
@@ -57,6 +58,14 @@ func init() {
 
 // Process cli flags and ensure no issues
 func validate() {
+	hl.Disable(flags.nocolor)
+
+	// Short circuit if version was requested
+	if flags.version {
+		hl.Printf("sysinfo version %s\n", sysinfo.Version)
+		os.Exit(Good)
+	}
+
 	// Validate cli flags
 	if cli.NArg() > 1 {
 		cli.Usage(ExtraArguments)
