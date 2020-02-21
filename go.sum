@@ -4,8 +4,8 @@ gitlab.com/mjwhitta/hilighter v1.6.8 h1:ZQVwJiOJ1bpbBsp4ZQDZH8rZbFPYpz1zfentvUdD
 gitlab.com/mjwhitta/hilighter v1.6.8/go.mod h1:VymjV65YNFj0GYnK3GfpzcHXKjUmvQk9pe6m//ryP1k=
 gitlab.com/mjwhitta/jq v1.1.2 h1:q4wZiJEQM5gP6L4aeOHbNHAJ/NFoumhAis2j2W6yqqA=
 gitlab.com/mjwhitta/jq v1.1.2/go.mod h1:XVXaZsgHKLBvxql7riHkBAYyYnS+FT534xwcBikUsEI=
-gitlab.com/mjwhitta/jsoncfg v1.3.2 h1:6p1uBm9RJialfWHud6lqnk0yuUh0HIhKqPB5aAToUTc=
-gitlab.com/mjwhitta/jsoncfg v1.3.2/go.mod h1:uXQ/hoLHHV9rX50s4fN/vTD4+pXhcxhfy1eGS6wsUcg=
+gitlab.com/mjwhitta/jsoncfg v1.3.3 h1:QxSrWthWVSWbK8a+PciAV0NM0QeQnOQK2jVrZajI+gg=
+gitlab.com/mjwhitta/jsoncfg v1.3.3/go.mod h1:uXQ/hoLHHV9rX50s4fN/vTD4+pXhcxhfy1eGS6wsUcg=
 gitlab.com/mjwhitta/pathname v1.0.6 h1:hboITLPbJigX9WvKD6pv+Ay4w9zleOHnmJtGswBoYXg=
 gitlab.com/mjwhitta/pathname v1.0.6/go.mod h1:DDc1eLhCHMHYMttam61vgyKGya/IIs2IDOTkr6GyFhs=
 gitlab.com/mjwhitta/where v1.0.0 h1:2Wjg6OIJIJIJhvIpUNT7xZER+fmgLswzxvn01JKQISQ=
