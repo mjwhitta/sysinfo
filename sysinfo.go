@@ -2,7 +2,6 @@ package sysinfo
 
 import (
 	"encoding/json"
-	"errors"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -89,7 +88,7 @@ func New(fields ...string) *SysInfo {
 		case "Uptime":
 			s.uptime()
 		default:
-			panic(errors.New("Invalid field: " + field))
+			panic(hl.Errorf("Invalid field: " + field))
 		}
 	}
 

@@ -1,7 +1,7 @@
 gitlab.com/mjwhitta/cli v1.7.9 h1:diX/L4pJ5A7i6kVdkFymm4T4ksdp225vd650nwqJ8+8=
 gitlab.com/mjwhitta/cli v1.7.9/go.mod h1:0nzOLJZWsbgzJp/EQoLHcCLvKXX/iakyOZIqg94xAzo=
-gitlab.com/mjwhitta/hilighter v1.6.8 h1:ZQVwJiOJ1bpbBsp4ZQDZH8rZbFPYpz1zfentvUdD0zs=
-gitlab.com/mjwhitta/hilighter v1.6.8/go.mod h1:VymjV65YNFj0GYnK3GfpzcHXKjUmvQk9pe6m//ryP1k=
+gitlab.com/mjwhitta/hilighter v1.6.9 h1:SCswq5adPwimVyEBn+0a29sO6oM1PRT0wUUj4DP1hbg=
+gitlab.com/mjwhitta/hilighter v1.6.9/go.mod h1:VymjV65YNFj0GYnK3GfpzcHXKjUmvQk9pe6m//ryP1k=
 gitlab.com/mjwhitta/jq v1.1.5 h1:i4gOAegUfTbRrcjxq2azsE1C09H8JMKjVO7QvUrlG+c=
 gitlab.com/mjwhitta/jq v1.1.5/go.mod h1:XVXaZsgHKLBvxql7riHkBAYyYnS+FT534xwcBikUsEI=
 gitlab.com/mjwhitta/jsoncfg v1.3.7 h1:85ATK7iR960AqwM78up1DsX9TlImr5gEQL/GWwFt/Ek=
