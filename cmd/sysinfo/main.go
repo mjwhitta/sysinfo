@@ -24,19 +24,13 @@ func main() {
 		}
 	}()
 
-	var dataColors []string
-	var fieldColors []string
 	var s *sysinfo.SysInfo
 
 	validate()
 
 	s = sysinfo.New()
-
-	dataColors, _ = config.GetStringArray("dataColors")
-	s.SetDataColors(dataColors...)
-
-	fieldColors, _ = config.GetStringArray("fieldColors")
-	s.SetFieldColors(fieldColors...)
+	s.SetDataColors(config.GetStringArray("dataColors")...)
+	s.SetFieldColors(config.GetStringArray("fieldColors")...)
 
 	hl.Println(s)
 }
