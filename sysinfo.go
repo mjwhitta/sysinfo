@@ -183,14 +183,15 @@ func (s *SysInfo) filesystems() []string {
 }
 
 func (s *SysInfo) format(k string, v string, max int) string {
+	var filler string
 	var line string
 
 	line = " "
 	for i := 0; i < max-len(k); i++ {
-		line += " "
+		filler += " "
 	}
 
-	line += hl.Hilights(s.fieldColors, k+":")
+	line = " " + hl.Hilights(s.fieldColors, filler+k+":")
 	line += " "
 	line += hl.Hilights(s.dataColors, v)
 
