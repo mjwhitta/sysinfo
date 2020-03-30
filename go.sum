@@ -8,5 +8,5 @@ gitlab.com/mjwhitta/jsoncfg v1.4.2 h1:VdGH9FsgY967ysiWbFZlZUsDY0N9FjCC+k6I9a0M1X
 gitlab.com/mjwhitta/jsoncfg v1.4.2/go.mod h1:jdmIYqgVRRopw5Eanmh1g6X0MdhxnWp9z3cXq79pCto=
 gitlab.com/mjwhitta/pathname v1.0.6 h1:hboITLPbJigX9WvKD6pv+Ay4w9zleOHnmJtGswBoYXg=
 gitlab.com/mjwhitta/pathname v1.0.6/go.mod h1:DDc1eLhCHMHYMttam61vgyKGya/IIs2IDOTkr6GyFhs=
-gitlab.com/mjwhitta/where v1.0.0 h1:2Wjg6OIJIJIJhvIpUNT7xZER+fmgLswzxvn01JKQISQ=
-gitlab.com/mjwhitta/where v1.0.0/go.mod h1:nIXYs+XVQzA06VA+kwvRDZCD+sQ0KnkU9azKMnEPcOw=
+gitlab.com/mjwhitta/where v1.0.2 h1:i3LFpFDRjOmEWBzGYdA8lMdMe5O6jVMumcNmYkYm2rE=
+gitlab.com/mjwhitta/where v1.0.2/go.mod h1:RWbc80KCNtIZe/079/3LWkQIOVbuk6qJWYfM0hpzT0s=
