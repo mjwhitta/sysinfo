@@ -2,6 +2,7 @@ package main
 
 import (
 	hl "gitlab.com/mjwhitta/hilighter"
+	"gitlab.com/mjwhitta/log"
 	"gitlab.com/mjwhitta/sysinfo"
 )
 
@@ -20,7 +21,7 @@ func main() {
 			if flags.verbose {
 				panic(r.(error).Error())
 			}
-			errx(Exception, r.(error).Error())
+			log.ErrX(Exception, r.(error).Error())
 		}
 	}()
 
