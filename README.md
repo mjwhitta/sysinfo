@@ -1,5 +1,9 @@
 # sysinfo
 
+[![Go Report Card](https://goreportcard.com/badge/gitlab.com/mjwhitta/sysinfo)](https://goreportcard.com/report/gitlab.com/mjwhitta/sysinfo)
+
+## What is this?
+
 Provides system info for use by other tools.
 
 ## How to install

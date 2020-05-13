@@ -16,24 +16,24 @@ import (
 
 // SysInfo is a struct containing relevant system information.
 type SysInfo struct {
-	Colors      string   `json:"-"`
-	CPU         string   `json:"CPU,omitempty"`
-	dataColors  []string `json:"-"`
-	fieldColors []string `json:"-"`
-	Height      int      `json:"-"`
-	HomeFS      string   `json:"HomeFS,omitempty"`
-	Host        string   `json:"Host,omitempty"`
-	IPv4        string   `json:"IPv4,omitempty"`
-	IPv6        string   `json:"IPv6,omitempty"`
-	Kernel      string   `json:"Kernel,omitempty"`
-	order       []string `json:"-"`
-	OS          string   `json:"OS,omitempty"`
-	RAM         string   `json:"RAM,omitempty"`
-	RootFS      string   `json:"RootFS,omitempty"`
-	Shell       string   `json:"Shell,omitempty"`
-	TTY         string   `json:"TTY,omitempty"`
-	Uptime      string   `json:"Uptime,omitempty"`
-	Width       int      `json:"-"`
+	Colors      string `json:"-"`
+	CPU         string `json:"CPU,omitempty"`
+	dataColors  []string
+	fieldColors []string
+	Height      int    `json:"-"`
+	HomeFS      string `json:"HomeFS,omitempty"`
+	Host        string `json:"Host,omitempty"`
+	IPv4        string `json:"IPv4,omitempty"`
+	IPv6        string `json:"IPv6,omitempty"`
+	Kernel      string `json:"Kernel,omitempty"`
+	order       []string
+	OS          string `json:"OS,omitempty"`
+	RAM         string `json:"RAM,omitempty"`
+	RootFS      string `json:"RootFS,omitempty"`
+	Shell       string `json:"Shell,omitempty"`
+	TTY         string `json:"TTY,omitempty"`
+	Uptime      string `json:"Uptime,omitempty"`
+	Width       int    `json:"-"`
 }
 
 // New will return a SysInfo pointer. A list of fields can be
@@ -58,39 +58,15 @@ func New(fields ...string) *SysInfo {
 		}
 	}
 
-	for _, field := range s.order {
-		switch field {
-		case "Colors":
-			s.colors()
-		case "CPU":
-			s.cpu()
-		case "FS":
-			s.filesystems()
-		case "Host":
-			s.hostname()
-		case "IP":
-			s.ipv4()
-			s.ipv6()
-		case "IPv4":
-			s.ipv4()
-		case "IPv6":
-			s.ipv6()
-		case "Kernel":
-			s.kernel()
-		case "OS":
-			s.operatingSystem()
-		case "RAM":
-			s.ram()
-		case "Shell":
-			s.shell()
-		case "TTY":
-			s.tty()
-		case "Uptime":
-			s.uptime()
-		default:
-			panic(hl.Errorf("Invalid field: " + field))
-		}
-	}
+	s.processFields()
+	s.calcSize()
+
+	return s
+}
+
+func (s *SysInfo) calcSize() {
+	s.Height = 0
+	s.Width = 0
 
 	for _, line := range strings.Split(hl.Plain(s.String()), "\n") {
 		s.Height++
@@ -98,8 +74,6 @@ func New(fields ...string) *SysInfo {
 			s.Width = len([]rune(line))
 		}
 	}
-
-	return s
 }
 
 func (s *SysInfo) colors() string {
@@ -128,7 +102,8 @@ func (s *SysInfo) cpu() string {
 	var r *regexp.Regexp
 
 	if info, e = ioutil.ReadFile("/proc/cpuinfo"); e != nil {
-		panic(e)
+		s.CPU = ""
+		return s.CPU
 	}
 
 	r = regexp.MustCompile(`(cpu model|model name)\s+:\s+(.+)`)
@@ -155,9 +130,7 @@ func (s *SysInfo) exec(cmd string, cli ...string) string {
 	}
 
 	if o, e = exec.Command(cmd, cli...).Output(); e != nil {
-		// return e.Error()
 		return ""
-		// panic(e)
 	}
 
 	return strings.TrimSpace(string(o))
@@ -186,7 +159,6 @@ func (s *SysInfo) format(k string, v string, max int) string {
 	var filler string
 	var line string
 
-	line = " "
 	for i := 0; i < max-len(k); i++ {
 		filler += " "
 	}
@@ -300,7 +272,8 @@ func (s *SysInfo) operatingSystem() string {
 
 	if pathname.DoesExist("/etc/os-release") {
 		if release, e = ioutil.ReadFile("/etc/os-release"); e != nil {
-			panic(e)
+			s.OS = ""
+			return s.OS
 		}
 
 		r = regexp.MustCompile(`PRETTY_NAME="(.+)"`)
@@ -314,6 +287,40 @@ func (s *SysInfo) operatingSystem() string {
 	}
 
 	return s.OS
+}
+
+func (s *SysInfo) processFields() {
+	for _, field := range s.order {
+		switch field {
+		case "Colors":
+			s.colors()
+		case "CPU":
+			s.cpu()
+		case "FS":
+			s.filesystems()
+		case "Host":
+			s.hostname()
+		case "IP":
+			s.ipv4()
+			s.ipv6()
+		case "IPv4":
+			s.ipv4()
+		case "IPv6":
+			s.ipv6()
+		case "Kernel":
+			s.kernel()
+		case "OS":
+			s.operatingSystem()
+		case "RAM":
+			s.ram()
+		case "Shell":
+			s.shell()
+		case "TTY":
+			s.tty()
+		case "Uptime":
+			s.uptime()
+		}
+	}
 }
 
 func (s *SysInfo) ram() string {
@@ -367,19 +374,13 @@ func (s *SysInfo) shell() string {
 // String will convert the SysInfo struct to a printable string.
 func (s *SysInfo) String() string {
 	var data = map[string]string{}
-	var e error
 	var hasKey bool
 	var max int
 	var out []string
 	var tmp []byte
 
-	if tmp, e = json.Marshal(s); e != nil {
-		panic(e)
-	}
-
-	if e = json.Unmarshal(tmp, &data); e != nil {
-		panic(e)
-	}
+	tmp, _ = json.Marshal(s)
+	json.Unmarshal(tmp, &data)
 
 	for k := range data {
 		if len(k) > max {
@@ -427,7 +428,7 @@ func (s *SysInfo) String() string {
 func (s *SysInfo) tty() string {
 	var e error
 	if s.TTY, e = os.Readlink("/proc/self/fd/0"); e != nil {
-		panic(e)
+		s.TTY = ""
 	}
 	return s.TTY
 }

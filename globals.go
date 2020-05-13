@@ -1,4 +1,4 @@
 package sysinfo
 
 // Version is the package version
-const Version = "1.0.41"
+const Version = "1.0.42"
