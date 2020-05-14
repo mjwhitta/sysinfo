@@ -36,6 +36,27 @@ func init() {
 		},
 		" ",
 	)
+	cli.Section(
+		"FIELDS",
+		strings.Join(
+			[]string{
+				"blank: Use a blank line as a separator\n",
+				"colors: Show terminal colors\n",
+				"cpu: Show cpu info\n",
+				"fs: Show filesystem usage\n",
+				"host: Show hostname\n",
+				"ipv4: Show IPv4 addresses\n",
+				"ipv6: Show IPv6 addresses\n",
+				"kernel: Show kernel info\n",
+				"os: Show operating system info\n",
+				"ram: Show RAM usage\n",
+				"shell: Show current shell\n",
+				"tty: Show TTY info\n",
+				"uptime: Show uptime",
+			},
+			"",
+		),
+	)
 	cli.Info = "System information at a glance."
 	cli.Title = "SysInfo"
 
@@ -44,8 +65,9 @@ func init() {
 		&flags.fields,
 		"f",
 		"field",
-		"Show specified field.",
-		"Can be used more than once.",
+		"Show specified field. Can be used more than once. By",
+		"default, all fields are shown. Use this flag to adjust the",
+		"order.",
 	)
 	cli.Flag(
 		&flags.nocolor,
