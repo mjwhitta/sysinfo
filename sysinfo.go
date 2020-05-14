@@ -44,17 +44,19 @@ func New(fields ...string) *SysInfo {
 	s.order = fields
 	if len(fields) == 0 {
 		s.order = []string{
-			"Host",
-			"OS",
-			"Kernel",
-			"Uptime",
-			"IP",
-			"Shell",
-			"TTY",
-			"CPU",
-			"RAM",
-			"FS",
-			"Colors",
+			"host",
+			"os",
+			"kernel",
+			"uptime",
+			"ipv4",
+			"ipv6",
+			"shell",
+			"tty",
+			"cpu",
+			"ram",
+			"fs",
+			"blank",
+			"colors",
 		}
 	}
 
@@ -290,37 +292,52 @@ func (s *SysInfo) operatingSystem() string {
 }
 
 func (s *SysInfo) processFields() {
+	var newOrder []string
+
 	for _, field := range s.order {
-		switch field {
-		case "Colors":
+		switch strings.ToLower(field) {
+		case "blank":
+			newOrder = append(newOrder, "Blank")
+		case "colors":
+			newOrder = append(newOrder, "Colors")
 			s.colors()
-		case "CPU":
+		case "cpu":
+			newOrder = append(newOrder, "CPU")
 			s.cpu()
-		case "FS":
+		case "fs":
+			newOrder = append(newOrder, "FS")
 			s.filesystems()
-		case "Host":
+		case "host":
+			newOrder = append(newOrder, "Host")
 			s.hostname()
-		case "IP":
+		case "ipv4":
+			newOrder = append(newOrder, "IPv4")
 			s.ipv4()
+		case "ipv6":
+			newOrder = append(newOrder, "IPv6")
 			s.ipv6()
-		case "IPv4":
-			s.ipv4()
-		case "IPv6":
-			s.ipv6()
-		case "Kernel":
+		case "kernel":
+			newOrder = append(newOrder, "Kernel")
 			s.kernel()
-		case "OS":
+		case "os":
+			newOrder = append(newOrder, "OS")
 			s.operatingSystem()
-		case "RAM":
+		case "ram":
+			newOrder = append(newOrder, "RAM")
 			s.ram()
-		case "Shell":
+		case "shell":
+			newOrder = append(newOrder, "Shell")
 			s.shell()
-		case "TTY":
+		case "tty":
+			newOrder = append(newOrder, "TTY")
 			s.tty()
-		case "Uptime":
+		case "uptime":
+			newOrder = append(newOrder, "Uptime")
 			s.uptime()
 		}
 	}
+
+	s.order = newOrder
 }
 
 func (s *SysInfo) ram() string {
@@ -390,9 +407,10 @@ func (s *SysInfo) String() string {
 
 	for _, field := range s.order {
 		switch field {
+		case "Blank":
+			out = append(out, "")
 		case "Colors":
 			if len(s.Colors) > 0 {
-				out = append(out, "")
 				out = append(out, " "+s.Colors)
 			}
 		case "FS":
@@ -402,16 +420,6 @@ func (s *SysInfo) String() string {
 			}
 
 			field = "HomeFS"
-			if _, hasKey = data[field]; hasKey {
-				out = append(out, s.format(field, data[field], max))
-			}
-		case "IP":
-			field = "IPv4"
-			if _, hasKey = data[field]; hasKey {
-				out = append(out, s.format(field, data[field], max))
-			}
-
-			field = "IPv6"
 			if _, hasKey = data[field]; hasKey {
 				out = append(out, s.format(field, data[field], max))
 			}

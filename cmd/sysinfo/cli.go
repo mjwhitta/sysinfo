@@ -11,6 +11,7 @@ import (
 
 // Flags
 type cliFlags struct {
+	fields  cli.StringList
 	nocolor bool
 	verbose bool
 	version bool
@@ -39,6 +40,13 @@ func init() {
 	cli.Title = "SysInfo"
 
 	// Parse cli flags
+	cli.Flag(
+		&flags.fields,
+		"f",
+		"field",
+		"Show specified field.",
+		"Can be used more than once.",
+	)
 	cli.Flag(
 		&flags.nocolor,
 		"no-color",

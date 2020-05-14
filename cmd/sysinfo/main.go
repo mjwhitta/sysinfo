@@ -29,7 +29,7 @@ func main() {
 
 	validate()
 
-	s = sysinfo.New()
+	s = sysinfo.New(flags.fields...)
 	s.SetDataColors(config.GetStringArray("dataColors")...)
 	s.SetFieldColors(config.GetStringArray("fieldColors")...)
 
