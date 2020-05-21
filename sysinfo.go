@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 
 	hl "gitlab.com/mjwhitta/hilighter"
 	"gitlab.com/mjwhitta/pathname"
@@ -60,8 +61,7 @@ func New(fields ...string) *SysInfo {
 		}
 	}
 
-	s.processFields()
-	s.calcSize()
+	s.Collect()
 
 	return s
 }
@@ -76,6 +76,137 @@ func (s *SysInfo) calcSize() {
 			s.Width = len([]rune(line))
 		}
 	}
+}
+
+// Clear will remove all system info.
+func (s *SysInfo) Clear() {
+	s.Colors = ""
+	s.CPU = ""
+	s.HomeFS = ""
+	s.Host = ""
+	s.IPv4 = ""
+	s.IPv6 = ""
+	s.Kernel = ""
+	s.OS = ""
+	s.RAM = ""
+	s.RootFS = ""
+	s.Shell = ""
+	s.TTY = ""
+	s.Uptime = ""
+	s.calcSize()
+}
+
+// Collect will get requested system info.
+func (s *SysInfo) Collect() {
+	var newOrder []string
+	var wg = sync.WaitGroup{}
+
+	for _, field := range s.order {
+		switch strings.ToLower(field) {
+		case "blank":
+			newOrder = append(newOrder, "Blank")
+		case "colors":
+			newOrder = append(newOrder, "Colors")
+
+			wg.Add(1)
+			go func() {
+				s.colors()
+				wg.Done()
+			}()
+		case "cpu":
+			newOrder = append(newOrder, "CPU")
+
+			wg.Add(1)
+			go func() {
+				s.cpu()
+				wg.Done()
+			}()
+		case "fs":
+			newOrder = append(newOrder, "FS")
+
+			wg.Add(1)
+			go func() {
+				s.filesystems()
+				wg.Done()
+			}()
+		case "host":
+			newOrder = append(newOrder, "Host")
+
+			wg.Add(1)
+			go func() {
+				s.hostname()
+				wg.Done()
+			}()
+		case "ipv4":
+			newOrder = append(newOrder, "IPv4")
+
+			wg.Add(1)
+			go func() {
+				s.ipv4()
+				wg.Done()
+			}()
+		case "ipv6":
+			newOrder = append(newOrder, "IPv6")
+
+			wg.Add(1)
+			go func() {
+				s.ipv6()
+				wg.Done()
+			}()
+		case "kernel":
+			newOrder = append(newOrder, "Kernel")
+
+			wg.Add(1)
+			go func() {
+				s.kernel()
+				wg.Done()
+			}()
+		case "os":
+			newOrder = append(newOrder, "OS")
+
+			wg.Add(1)
+			go func() {
+				s.operatingSystem()
+				wg.Done()
+			}()
+		case "ram":
+			newOrder = append(newOrder, "RAM")
+
+			wg.Add(1)
+			go func() {
+				s.ram()
+				wg.Done()
+			}()
+		case "shell":
+			newOrder = append(newOrder, "Shell")
+
+			wg.Add(1)
+			go func() {
+				s.shell()
+				wg.Done()
+			}()
+		case "tty":
+			newOrder = append(newOrder, "TTY")
+
+			wg.Add(1)
+			go func() {
+				s.tty()
+				wg.Done()
+			}()
+		case "uptime":
+			newOrder = append(newOrder, "Uptime")
+
+			wg.Add(1)
+			go func() {
+				s.uptime()
+				wg.Done()
+			}()
+		}
+	}
+
+	s.order = newOrder
+	wg.Wait()
+	s.calcSize()
 }
 
 func (s *SysInfo) colors() string {
@@ -289,55 +420,6 @@ func (s *SysInfo) operatingSystem() string {
 	}
 
 	return s.OS
-}
-
-func (s *SysInfo) processFields() {
-	var newOrder []string
-
-	for _, field := range s.order {
-		switch strings.ToLower(field) {
-		case "blank":
-			newOrder = append(newOrder, "Blank")
-		case "colors":
-			newOrder = append(newOrder, "Colors")
-			s.colors()
-		case "cpu":
-			newOrder = append(newOrder, "CPU")
-			s.cpu()
-		case "fs":
-			newOrder = append(newOrder, "FS")
-			s.filesystems()
-		case "host":
-			newOrder = append(newOrder, "Host")
-			s.hostname()
-		case "ipv4":
-			newOrder = append(newOrder, "IPv4")
-			s.ipv4()
-		case "ipv6":
-			newOrder = append(newOrder, "IPv6")
-			s.ipv6()
-		case "kernel":
-			newOrder = append(newOrder, "Kernel")
-			s.kernel()
-		case "os":
-			newOrder = append(newOrder, "OS")
-			s.operatingSystem()
-		case "ram":
-			newOrder = append(newOrder, "RAM")
-			s.ram()
-		case "shell":
-			newOrder = append(newOrder, "Shell")
-			s.shell()
-		case "tty":
-			newOrder = append(newOrder, "TTY")
-			s.tty()
-		case "uptime":
-			newOrder = append(newOrder, "Uptime")
-			s.uptime()
-		}
-	}
-
-	s.order = newOrder
 }
 
 func (s *SysInfo) ram() string {

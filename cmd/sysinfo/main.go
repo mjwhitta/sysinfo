@@ -33,5 +33,7 @@ func main() {
 	s.SetDataColors(config.GetStringArray("dataColors")...)
 	s.SetFieldColors(config.GetStringArray("fieldColors")...)
 
-	hl.Println(s)
+	if s.String() != "" {
+		hl.Println(s)
+	}
 }
