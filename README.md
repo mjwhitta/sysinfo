@@ -1,5 +1,7 @@
 # sysinfo
 
+<a href="https://www.buymeacoffee.com/mjwhitta">🍪 Buy me a cookie</a>
+
 [![Go Report Card](https://goreportcard.com/badge/gitlab.com/mjwhitta/sysinfo)](https://goreportcard.com/report/gitlab.com/mjwhitta/sysinfo)
 
 ## What is this?
