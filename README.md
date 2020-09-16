@@ -21,9 +21,11 @@ Or install from source:
 ```
 $ git clone https://gitlab.com/mjwhitta/sysinfo.git
 $ cd sysinfo
-$ make
-$ cp ./build/linux/amd64/sysinfo ~/.local/bin
+$ git submodule update --init
+$ make install
 ```
+
+**Note:** `make install` will install to `$HOME/.local/bin`.
 
 ## How to use
 
