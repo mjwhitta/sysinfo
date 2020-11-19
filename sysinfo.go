@@ -258,7 +258,7 @@ func (s *SysInfo) exec(cmd string, cli ...string) string {
 	var e error
 	var o []byte
 
-	if len(cmd) == 0 || len(where.Is(cmd)) == 0 {
+	if (cmd == "") || (where.Is(cmd) == "") {
 		return ""
 	}
 
@@ -529,7 +529,7 @@ func (s *SysInfo) uptime() string {
 	s.Uptime = s.exec("uptime")
 
 	// Fail fast
-	if len(s.Uptime) == 0 {
+	if s.Uptime == "" {
 		return s.Uptime
 	}
 
