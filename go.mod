@@ -8,5 +8,5 @@ require (
 	gitlab.com/mjwhitta/jsoncfg v1.4.4
 	gitlab.com/mjwhitta/log v1.4.3
 	gitlab.com/mjwhitta/pathname v1.0.6
-	gitlab.com/mjwhitta/where v1.0.16
+	gitlab.com/mjwhitta/where v1.0.17
 )
