@@ -208,5 +208,9 @@ func (s *SysInfo) uptime() string {
 	r = regexp.MustCompile(`^(,?\s*)+|(,?\s*)+$`)
 	s.Uptime = r.ReplaceAllString(s.Uptime, "")
 
+	if s.Uptime == "" {
+		return "0 mins"
+	}
+
 	return s.Uptime
 }
