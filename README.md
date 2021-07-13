@@ -13,7 +13,7 @@ Provides system info for use by other tools.
 Open a terminal and run the following:
 
 ```
-$ go get -ldflags "-s -w" -u gitlab.com/mjwhitta/sysinfo/cmd/sysinfo
+$ go get --ldflags "-s -w" --trimpath -u gitlab.com/mjwhitta/sysinfo/cmd/sysinfo
 ```
 
 Or install from source:
