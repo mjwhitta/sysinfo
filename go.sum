@@ -14,5 +14,5 @@ gitlab.com/mjwhitta/safety v1.7.1 h1:Gm/P60SUSkuvYNV1hy83GCJDTBlZLsEUMDF6fFD/7KE
 gitlab.com/mjwhitta/safety v1.7.1/go.mod h1:wVWKeBfk2rr32ErLuSTu5+U5sgvfsmgSdw7WmrrQkqU=
 gitlab.com/mjwhitta/where v1.0.21 h1:0Fb2nU4zZtiDdJKUvoTd5TKRaOJ6Q8gcYmv925FLt84=
 gitlab.com/mjwhitta/where v1.0.21/go.mod h1:CtZdOrzwCcwhIASfTWVmP7HOiTC325/VdegKYI+S8pc=
-golang.org/x/sys v0.0.0-20210817190340-bfb29a6856f2 h1:c8PlLMqBbOHoqtjteWm5/kbe6rNY2pbRfbIMVnepueo=
-golang.org/x/sys v0.0.0-20210817190340-bfb29a6856f2/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.0.0-20211020174200-9d6173849985 h1:LOlKVhfDyahgmqa97awczplwkjzNaELFg3zRIJ13RYo=
+golang.org/x/sys v0.0.0-20211020174200-9d6173849985/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=

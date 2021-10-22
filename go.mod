@@ -9,7 +9,7 @@ require (
 	gitlab.com/mjwhitta/log v1.4.4
 	gitlab.com/mjwhitta/pathname v1.0.9
 	gitlab.com/mjwhitta/where v1.0.21
-	golang.org/x/sys v0.0.0-20210817190340-bfb29a6856f2
+	golang.org/x/sys v0.0.0-20211020174200-9d6173849985
 )
 
 require (
