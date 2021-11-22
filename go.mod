@@ -14,5 +14,5 @@ require (
 
 require (
 	gitlab.com/mjwhitta/jq v1.3.2 // indirect
-	gitlab.com/mjwhitta/safety v1.10.0 // indirect
+	gitlab.com/mjwhitta/safety v1.11.0 // indirect
 )
