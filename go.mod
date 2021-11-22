@@ -8,7 +8,7 @@ require (
 	gitlab.com/mjwhitta/jsoncfg v1.4.6
 	gitlab.com/mjwhitta/log v1.4.4
 	gitlab.com/mjwhitta/pathname v1.0.9
-	gitlab.com/mjwhitta/where v1.0.24
+	gitlab.com/mjwhitta/where v1.0.25
 	golang.org/x/sys v0.0.0-20211117180635-dee7805ff2e1
 )
 
