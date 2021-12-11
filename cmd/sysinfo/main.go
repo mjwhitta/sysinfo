@@ -6,15 +6,6 @@ import (
 	"gitlab.com/mjwhitta/sysinfo"
 )
 
-// Exit status
-const (
-	Good            int = 0
-	InvalidOption   int = 1
-	InvalidArgument int = 2
-	ExtraArguments  int = 3
-	Exception       int = 4
-)
-
 func main() {
 	defer func() {
 		if r := recover(); r != nil {
