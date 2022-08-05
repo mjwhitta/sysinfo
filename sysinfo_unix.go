@@ -4,7 +4,6 @@
 package sysinfo
 
 import (
-	"io/ioutil"
 	"os"
 	"regexp"
 	"strconv"
@@ -39,7 +38,7 @@ func (s *SysInfo) cpu() string {
 	var info []byte
 	var r *regexp.Regexp
 
-	if info, e = ioutil.ReadFile("/proc/cpuinfo"); e != nil {
+	if info, e = os.ReadFile("/proc/cpuinfo"); e != nil {
 		s.CPU = ""
 		return s.CPU
 	}
@@ -98,7 +97,7 @@ func (s *SysInfo) kernel() string {
 	var e error
 	var kernel []byte
 
-	kernel, e = ioutil.ReadFile("/proc/sys/kernel/osrelease")
+	kernel, e = os.ReadFile("/proc/sys/kernel/osrelease")
 	if e == nil {
 		s.Kernel = strings.TrimSpace(string(kernel))
 	}
@@ -113,7 +112,7 @@ func (s *SysInfo) operatingSystem() string {
 	var release []byte
 
 	if ok, _ := pathname.DoesExist("/etc/os-release"); ok {
-		if release, e = ioutil.ReadFile("/etc/os-release"); e != nil {
+		if release, e = os.ReadFile("/etc/os-release"); e != nil {
 			s.OS = ""
 			return s.OS
 		}
