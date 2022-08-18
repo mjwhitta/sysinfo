@@ -18,16 +18,14 @@ $ go install --ldflags "-s -w" --trimpath \
     gitlab.com/mjwhitta/sysinfo/cmd/sysinfo@latest
 ```
 
-Or install from source:
+Or compile from source:
 
 ```
 $ git clone https://gitlab.com/mjwhitta/sysinfo.git
 $ cd sysinfo
 $ git submodule update --init
-$ make install
+$ make
 ```
-
-**Note:** `make install` will install to `$HOME/.local/bin`.
 
 ## How to use
 
