@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	hl "gitlab.com/mjwhitta/hilighter"
+	hl "github.com/mjwhitta/hilighter"
 )
 
 func (s *SysInfo) colors() string {

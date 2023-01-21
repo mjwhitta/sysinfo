@@ -8,8 +8,8 @@ import (
 	"strings"
 	"sync"
 
-	hl "gitlab.com/mjwhitta/hilighter"
-	"gitlab.com/mjwhitta/where"
+	hl "github.com/mjwhitta/hilighter"
+	"github.com/mjwhitta/where"
 )
 
 // SysInfo is a struct containing relevant system information.
@@ -345,13 +345,13 @@ func (s *SysInfo) ipv6() string {
 }
 
 // SetDataColors will set the color values for the field data. See
-// gitlab.com/mjwhitta/hilighter for valid colors.
+// github.com/mjwhitta/hilighter for valid colors.
 func (s *SysInfo) SetDataColors(colors ...string) {
 	s.dataColors = colors
 }
 
 // SetFieldColors will set the color values for the field names. See
-// gitlab.com/mjwhitta/hilighter for valid colors.
+// github.com/mjwhitta/hilighter for valid colors.
 func (s *SysInfo) SetFieldColors(colors ...string) {
 	s.fieldColors = colors
 }

@@ -1,9 +1,9 @@
 package main
 
 import (
-	hl "gitlab.com/mjwhitta/hilighter"
-	"gitlab.com/mjwhitta/log"
-	"gitlab.com/mjwhitta/sysinfo"
+	hl "github.com/mjwhitta/hilighter"
+	"github.com/mjwhitta/log"
+	"github.com/mjwhitta/sysinfo"
 )
 
 func main() {

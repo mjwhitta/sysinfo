@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	hl "gitlab.com/mjwhitta/hilighter"
-	"gitlab.com/mjwhitta/pathname"
+	hl "github.com/mjwhitta/hilighter"
+	"github.com/mjwhitta/pathname"
 )
 
 func (s *SysInfo) colors() string {

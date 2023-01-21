@@ -2,7 +2,7 @@
 
 <a href="https://www.buymeacoffee.com/mjwhitta">🍪 Buy me a cookie</a>
 
-[![Go Report Card](https://goreportcard.com/badge/gitlab.com/mjwhitta/sysinfo)](https://goreportcard.com/report/gitlab.com/mjwhitta/sysinfo)
+[![Go Report Card](https://goreportcard.com/badge/github.com/mjwhitta/sysinfo)](https://goreportcard.com/report/github.com/mjwhitta/sysinfo)
 
 ## What is this?
 
@@ -13,15 +13,15 @@ Provides system info for use by other tools.
 Open a terminal and run the following:
 
 ```
-$ go get --ldflags "-s -w" --trimpath -u gitlab.com/mjwhitta/sysinfo
+$ go get --ldflags "-s -w" --trimpath -u github.com/mjwhitta/sysinfo
 $ go install --ldflags "-s -w" --trimpath \
-    gitlab.com/mjwhitta/sysinfo/cmd/sysinfo@latest
+    github.com/mjwhitta/sysinfo/cmd/sysinfo@latest
 ```
 
 Or compile from source:
 
 ```
-$ git clone https://gitlab.com/mjwhitta/sysinfo.git
+$ git clone https://github.com/mjwhitta/sysinfo.git
 $ cd sysinfo
 $ git submodule update --init
 $ make
@@ -39,7 +39,7 @@ package main
 import (
     "fmt"
 
-    "gitlab.com/mjwhitta/sysinfo"
+    "github.com/mjwhitta/sysinfo"
 )
 
 func main() {
@@ -65,7 +65,7 @@ These values can be changed to adjust the key/value bg/fg colors.
 
 ## Links
 
-- [Source](https://gitlab.com/mjwhitta/sysinfo)
+- [Source](https://github.com/mjwhitta/sysinfo)
 
 ## TODO
 

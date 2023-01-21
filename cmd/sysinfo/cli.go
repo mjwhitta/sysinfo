@@ -4,9 +4,9 @@ import (
 	"os"
 	"strings"
 
-	"gitlab.com/mjwhitta/cli"
-	hl "gitlab.com/mjwhitta/hilighter"
-	"gitlab.com/mjwhitta/sysinfo"
+	"github.com/mjwhitta/cli"
+	hl "github.com/mjwhitta/hilighter"
+	"github.com/mjwhitta/sysinfo"
 )
 
 // Exit status
