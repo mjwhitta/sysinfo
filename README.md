@@ -54,14 +54,16 @@ config looks like:
 
 ```
 {
-  "kbg": "on_default",
-  "kfg": "blue",
-  "vbg": "on_default",
-  "vfg": "green"
+  "dataColors": [
+    "green"
+  ],
+  "fieldColors": [
+    "blue"
+  ]
 }
 ```
 
-These values can be changed to adjust the key/value bg/fg colors.
+These values can be adjusted to meet your needs.
 
 ## Links
 
