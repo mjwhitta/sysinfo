@@ -5,6 +5,7 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"sort"
 	"strings"
 	"sync"
 
@@ -23,9 +24,9 @@ type SysInfo struct {
 	Host        string `json:"Host,omitempty"`
 	ipMutex     *sync.Mutex
 	ips         map[string][]string
-	IPv4        string `json:"IPv4,omitempty"`
-	IPv6        string `json:"IPv6,omitempty"`
-	Kernel      string `json:"Kernel,omitempty"`
+	IPv4        []string `json:"IPv4,omitempty"`
+	IPv6        []string `json:"IPv6,omitempty"`
+	Kernel      string   `json:"Kernel,omitempty"`
 	order       []string
 	OS          string `json:"OS,omitempty"`
 	RAM         string `json:"RAM,omitempty"`
@@ -84,8 +85,8 @@ func (s *SysInfo) Clear() {
 	s.HomeFS = ""
 	s.Host = ""
 	s.ips = nil
-	s.IPv4 = ""
-	s.IPv6 = ""
+	s.IPv4 = []string{}
+	s.IPv6 = []string{}
 	s.Kernel = ""
 	s.OS = ""
 	s.RAM = ""
@@ -300,12 +301,12 @@ func (s *SysInfo) hostname() string {
 	return s.Host
 }
 
-func (s *SysInfo) ipv4() string {
+func (s *SysInfo) ipv4() []string {
 	var ip net.IP
 	var tmp string
 
-	for _, vs := range s.getIPs() {
-		for _, v := range vs {
+	for iface, ips := range s.getIPs() {
+		for _, v := range ips {
 			tmp = v[0:strings.Index(v, "/")]
 
 			if ip = net.ParseIP(tmp); ip == nil {
@@ -313,21 +314,21 @@ func (s *SysInfo) ipv4() string {
 			}
 
 			if ip.To4() != nil {
-				s.IPv4 = v
-				return s.IPv4
+				s.IPv4 = append(s.IPv4, iface+" "+v)
 			}
 		}
 	}
 
+	sort.Strings(s.IPv4)
 	return s.IPv4
 }
 
-func (s *SysInfo) ipv6() string {
+func (s *SysInfo) ipv6() []string {
 	var ip net.IP
 	var tmp string
 
-	for _, vs := range s.getIPs() {
-		for _, v := range vs {
+	for iface, ips := range s.getIPs() {
+		for _, v := range ips {
 			tmp = v[0:strings.Index(v, "/")]
 
 			if ip = net.ParseIP(tmp); ip == nil {
@@ -335,12 +336,12 @@ func (s *SysInfo) ipv6() string {
 			}
 
 			if ip.To4() == nil {
-				s.IPv6 = v
-				return s.IPv6
+				s.IPv6 = append(s.IPv6, iface+" "+v)
 			}
 		}
 	}
 
+	sort.Strings(s.IPv6)
 	return s.IPv6
 }
 
@@ -390,6 +391,14 @@ func (s *SysInfo) String() string {
 			field = "HomeFS"
 			if _, hasKey = data[field]; hasKey {
 				out = append(out, s.format(field, data[field], max))
+			}
+		case "IPv4":
+			for _, ip := range s.IPv4 {
+				out = append(out, s.format(field, ip, max))
+			}
+		case "IPv6":
+			for _, ip := range s.IPv6 {
+				out = append(out, s.format(field, ip, max))
 			}
 		default:
 			if _, hasKey = data[field]; hasKey {
