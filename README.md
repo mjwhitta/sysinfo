@@ -1,6 +1,6 @@
 # sysinfo
 
-<a href="https://www.buymeacoffee.com/mjwhitta">🍪 Buy me a cookie</a>
+[![Yum](https://img.shields.io/badge/-Buy%20me%20a%20cookie-blue?style=for-the-badge&logo=cookiecutter)](https://www.buymeacoffee.com/mjwhitta)
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/mjwhitta/sysinfo)](https://goreportcard.com/report/github.com/mjwhitta/sysinfo)
 
