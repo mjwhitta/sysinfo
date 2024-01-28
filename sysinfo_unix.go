@@ -59,7 +59,7 @@ func (s *SysInfo) cpu() string {
 }
 
 func (s *SysInfo) filesystems() []string {
-	var out = []string{}
+	var out []string
 
 	s.RootFS = s.fsUsage("/")
 	s.HomeFS = s.fsUsage("/home")

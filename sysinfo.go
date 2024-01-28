@@ -40,7 +40,7 @@ type SysInfo struct {
 // New will return a SysInfo pointer. A list of fields can be
 // supplied if all info is not wanted.
 func New(fields ...string) *SysInfo {
-	var s = &SysInfo{ipMutex: &sync.Mutex{}}
+	var s *SysInfo = &SysInfo{ipMutex: &sync.Mutex{}}
 
 	s.order = fields
 	if len(fields) == 0 {
@@ -100,7 +100,7 @@ func (s *SysInfo) Clear() {
 // Collect will get requested system info.
 func (s *SysInfo) Collect() {
 	var newOrder []string
-	var wg = sync.WaitGroup{}
+	var wg sync.WaitGroup
 
 	for _, field := range s.order {
 		switch strings.ToLower(field) {
@@ -357,9 +357,9 @@ func (s *SysInfo) SetFieldColors(colors ...string) {
 	s.fieldColors = colors
 }
 
-// String will convert the SysInfo struct to a printable string.
+// String will return a string representation of the SysInfo.
 func (s *SysInfo) String() string {
-	var data = map[string]string{}
+	var data map[string]string = map[string]string{}
 	var hasKey bool
 	var max int
 	var out []string
