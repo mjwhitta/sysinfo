@@ -8,8 +8,8 @@ require (
 	github.com/mjwhitta/jsoncfg v1.6.12
 	github.com/mjwhitta/log v1.6.7
 	github.com/mjwhitta/pathname v1.2.5
-	github.com/mjwhitta/where v1.2.10
-	golang.org/x/sys v0.16.0
+	github.com/mjwhitta/where v1.3.0
+	golang.org/x/sys v0.17.0
 )
 
 require (

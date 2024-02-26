@@ -15,10 +15,10 @@ github.com/mjwhitta/pathname v1.2.5 h1:wSUZGv+mCrmndNkX2uak8XMZhkXXbgjYG/dMclGKr
 github.com/mjwhitta/pathname v1.2.5/go.mod h1:t0k8GIucdXPKhiKyV4aAWtBA9LhLB7mV50DJlhrMpog=
 github.com/mjwhitta/safety v1.11.3 h1:dpg6CIQrlrt8yf/cXEdhPI+vRV6g/cRw8uO/TmUK1Mg=
 github.com/mjwhitta/safety v1.11.3/go.mod h1:K/LrHWgnJlD5vCe0c9tH4E2prhl4Xpl6nBelXAvuXo0=
-github.com/mjwhitta/where v1.2.10 h1:vxHJh0IavPgQCd2a1060bOfUMklC2aMyhz0UrO074bQ=
-github.com/mjwhitta/where v1.2.10/go.mod h1:RJPnB3KocU9KnulwPs6fjNfE4u6qtOoVmpqs4dy3ZYI=
+github.com/mjwhitta/where v1.3.0 h1:PcwmkK8H8eGeTSBOlHrnf0bR8bS2gaNmmyhEQl+Mgvg=
+github.com/mjwhitta/where v1.3.0/go.mod h1:RJPnB3KocU9KnulwPs6fjNfE4u6qtOoVmpqs4dy3ZYI=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=
-golang.org/x/sys v0.16.0 h1:xWw16ngr6ZMtmxDyKyIgsE93KNKz5HKmMa3b8ALHidU=
-golang.org/x/sys v0.16.0/go.mod h1:/VUhepiaJMQUp4+oa/7Zr1D23ma6VTLIYjOOTFZPUcA=
+golang.org/x/sys v0.17.0 h1:25cE3gD+tdBA7lp7QfhuV+rJiE9YXTcS3VG1SqssI/Y=
+golang.org/x/sys v0.17.0/go.mod h1:/VUhepiaJMQUp4+oa/7Zr1D23ma6VTLIYjOOTFZPUcA=
 gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
