@@ -366,7 +366,7 @@ func (s *SysInfo) String() string {
 	var tmp []byte
 
 	tmp, _ = json.Marshal(s)
-	json.Unmarshal(tmp, &data)
+	_ = json.Unmarshal(tmp, &data)
 
 	for k := range data {
 		if len(k) > max {

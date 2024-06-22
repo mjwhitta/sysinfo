@@ -6,8 +6,8 @@ var config *jsoncfg.JSONCfg
 
 func init() {
 	config = jsoncfg.New("~/.config/sysinfo/rc")
-	config.SetDefault([]string{"green"}, "dataColors")
-	config.SetDefault([]string{"blue"}, "fieldColors")
-	config.SaveDefault()
-	config.Reset()
+	_ = config.SetDefault([]string{"green"}, "dataColors")
+	_ = config.SetDefault([]string{"blue"}, "fieldColors")
+	_ = config.SaveDefault()
+	_ = config.Reset()
 }
