@@ -14,9 +14,8 @@ Provides system info for use by other tools.
 Open a terminal and run the following:
 
 ```
-$ go get --ldflags "-s -w" --trimpath -u github.com/mjwhitta/sysinfo
-$ go install --ldflags "-s -w" --trimpath \
-    github.com/mjwhitta/sysinfo/cmd/sysinfo@latest
+$ go get -u github.com/mjwhitta/sysinfo
+$ go install github.com/mjwhitta/sysinfo/cmd/sysinfo@latest
 ```
 
 Or compile from source:
