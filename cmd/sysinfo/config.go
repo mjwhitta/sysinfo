@@ -3,10 +3,11 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/mjwhitta/errors"
 )
 
 type config struct {
@@ -23,7 +24,7 @@ func init() {
 	var fn string
 
 	if fn, e = os.UserConfigDir(); e != nil {
-		panic(fmt.Errorf("user has no cfg directory: %w", e))
+		panic(errors.Newf("user has no cfg directory: %w", e))
 	}
 
 	fn = filepath.Join(fn, "sysinfo", "rc")
@@ -42,7 +43,7 @@ func init() {
 		}
 	} else {
 		if e = json.Unmarshal(b, &cfg); e != nil {
-			panic(fmt.Errorf("invalid cfg: %w", e))
+			panic(errors.Newf("invalid cfg: %w", e))
 		}
 	}
 
@@ -59,7 +60,7 @@ func (c *config) Save() error {
 	var e error
 
 	if e = os.MkdirAll(filepath.Dir(c.file), 0o700); e != nil {
-		return fmt.Errorf(
+		return errors.Newf(
 			"failed to create directory %s: %w",
 			filepath.Dir(c.file),
 			e,
@@ -67,7 +68,7 @@ func (c *config) Save() error {
 	}
 
 	if e = os.WriteFile(c.file, []byte(c.String()), 0o600); e != nil {
-		return fmt.Errorf("failed to write %s: %w", c.file, e)
+		return errors.Newf("failed to write %s: %w", c.file, e)
 	}
 
 	return nil
