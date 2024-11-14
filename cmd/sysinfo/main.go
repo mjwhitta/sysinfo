@@ -21,8 +21,8 @@ func main() {
 	validate()
 
 	s = sysinfo.New(flags.fields...)
-	s.SetDataColors(config.GetStringArray("dataColors")...)
-	s.SetFieldColors(config.GetStringArray("fieldColors")...)
+	s.SetDataColors(cfg.DataColors...)
+	s.SetFieldColors(cfg.FieldColors...)
 
 	if s.String() != "" {
 		hl.Println(s)

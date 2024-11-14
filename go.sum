@@ -5,10 +5,6 @@ github.com/mjwhitta/errors v1.0.3 h1:0+L8/7ypucj6ufBNt8Rm2qPvJ9qwmS+TtgOJYCYb6Sw
 github.com/mjwhitta/errors v1.0.3/go.mod h1:VxHM8bLMPVqkvHiYQq4Nq4sjNqPjUtKLhSF2I0wve5U=
 github.com/mjwhitta/hilighter v1.11.10 h1:PjOI00Kr+NY2SpzqQMzOjZcTOJV6uurGibUq8mhRnRo=
 github.com/mjwhitta/hilighter v1.11.10/go.mod h1:/6nqATH7zdFK+CDzYKdSzA0oXR+DGDHBME/Jktc5FoA=
-github.com/mjwhitta/jq v1.5.6 h1:Oyf/yC6+TJ6KUg3ixaklJs2GXhMOLbEU3gIEpiFJGqw=
-github.com/mjwhitta/jq v1.5.6/go.mod h1:Caobm8oao5AJcddjRyLbl8HVxVsC2OkBj1CmQenhU90=
-github.com/mjwhitta/jsoncfg v1.6.13 h1:y+6oh1Sbp8WEbifAAWIHNQ7Wv6VnqypXQkpyQVPilgY=
-github.com/mjwhitta/jsoncfg v1.6.13/go.mod h1:Yd/4N20dm4TjMUA9KzE5L1XwXOiW+k4IWcZeB7GSDvo=
 github.com/mjwhitta/log v1.6.10 h1:HJGV+7sPLsiMwbfKFp+JZ1ulzk1j7ciS99/D7HX6HM0=
 github.com/mjwhitta/log v1.6.10/go.mod h1:YT8YtwmqctTAquuAd/eNKQ49G6L3nYbQiujAEA9V95E=
 github.com/mjwhitta/pathname v1.2.6 h1:Typr5o3gDvcc+W3tKl65fCySynsbnYHdiWOI4F4l6dc=

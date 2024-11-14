@@ -43,23 +43,27 @@ func init() {
 		hl.Sprintf("%d: Extra argument\n", ExtraArgument),
 		hl.Sprintf("%d: Exception", Exception),
 	)
-	cli.Section(
-		"FIELDS",
-		"blank: Use a blank line as a separator\n",
-		"colors: Show terminal colors\n",
-		"cpu: Show cpu info\n",
-		"fs: Show filesystem usage\n",
-		"host: Show hostname\n",
-		"ipv4: Show IPv4 addresses\n",
-		"ipv6: Show IPv6 addresses\n",
-		"kernel: Show kernel info\n",
-		"os: Show operating system info\n",
-		"ram: Show RAM usage\n",
-		"shell: Show current shell\n",
-		"tty: Show TTY info\n",
-		"uptime: Show uptime",
+	cli.Info(
+		"System information at a glance. Configuration is stored in",
+		"~/.config/sysinfo/rc.",
 	)
-	cli.Info("System information at a glance.")
+	cli.SectionAligned(
+		"FIELDS",
+		":",
+		"blank:Use a blank line as a separator\n",
+		"colors:Show terminal colors\n",
+		"cpu:Show cpu info\n",
+		"fs:Show filesystem usage\n",
+		"host:Show hostname\n",
+		"ipv4:Show IPv4 addresses\n",
+		"ipv6:Show IPv6 addresses\n",
+		"kernel:Show kernel info\n",
+		"os:Show operating system info\n",
+		"ram:Show RAM usage\n",
+		"shell:Show current shell\n",
+		"tty:Show TTY info\n",
+		"uptime:Show uptime",
+	)
 	cli.Title = "SysInfo"
 
 	// Parse cli flags
