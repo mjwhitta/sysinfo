@@ -229,7 +229,7 @@ func (s *SysInfo) format(k string, v string, max int) string {
 	var filler string
 	var line string
 
-	for i := 0; i < max-len(k); i++ {
+	for range max - len(k) {
 		filler += " "
 	}
 
