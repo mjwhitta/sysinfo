@@ -55,10 +55,10 @@ config looks like:
 
 ```
 {
-  "dataColors": [
+  "data_colors": [
     "green"
   ],
-  "fieldColors": [
+  "field_colors": [
     "blue"
   ]
 }
