@@ -1,15 +1,17 @@
+//go:build darwin
+
 package sysinfo
 
 import (
+	"fmt"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 
 	hl "github.com/mjwhitta/hilighter"
 )
 
-func (s *SysInfo) colors() string {
+func (s *SysInfo) colors() {
 	s.Colors = strings.Join(
 		[]string{
 			hl.Hilights([]string{"light_black", "on_black"}, "▄▄▄"),
@@ -26,150 +28,123 @@ func (s *SysInfo) colors() string {
 		},
 		"",
 	)
-	return s.Colors
 }
 
-func (s *SysInfo) cpu() string {
-	var r *regexp.Regexp
-
+func (s *SysInfo) cpu() {
 	s.CPU = s.exec("sysctl", "-n", "machdep.cpu.brand_string")
-
-	r = regexp.MustCompile(`\((R|TM)\)| (@|CPU)`)
-	s.CPU = r.ReplaceAllString(s.CPU, "")
-
-	r = regexp.MustCompile(`\s+`)
-	s.CPU = r.ReplaceAllString(s.CPU, " ")
-
-	return s.CPU
+	s.CPU = reCPUBrand.ReplaceAllString(s.CPU, "")
+	s.CPU = reWhiteSpace.ReplaceAllString(s.CPU, " ")
 }
 
-func (s *SysInfo) filesystems() []string {
-	var out []string
-
+func (s *SysInfo) filesystems() {
 	s.RootFS = s.fsUsage("/")
-	s.HomeFS = s.fsUsage("/home")
 
-	if s.RootFS != "" {
-		out = append(out, s.RootFS)
-	}
-
-	if (s.HomeFS != "") && (s.HomeFS != s.RootFS) {
-		out = append(out, s.HomeFS)
-	} else {
+	if s.HomeFS = s.fsUsage("/home"); s.HomeFS == s.RootFS {
 		s.HomeFS = ""
 	}
 
-	return out
+	if s.RootFS == "" {
+		s.RootFS = "unknown"
+	}
 }
 
 func (s *SysInfo) fsUsage(path string) string {
-	var usage string
-	var words []string
-
-	usage = s.exec("df", "-h", path)
+	var cols []string
+	var usage string = s.exec("df", "-h", path)
 
 	for _, line := range strings.Split(usage, "\n") {
-		words = strings.Fields(line)
-		if (len(words) == 9) && (words[8] == path) {
-			return words[2] + " / " + words[1] + " (" + words[4] + ")"
+		cols = strings.Fields(line)
+
+		//nolint:mnd // Validate output format
+		if (len(cols) == 9) && (cols[8] == path) {
+			return cols[2] + " / " + cols[1] + " (" + cols[4] + ")"
 		}
 	}
 
 	return ""
 }
 
-func (s *SysInfo) kernel() string {
+func (s *SysInfo) kernel() {
 	s.Kernel = s.exec("sysctl", "-n", "kern.osrelease")
-	return s.Kernel
 }
 
-func (s *SysInfo) operatingSystem() string {
+func (s *SysInfo) operatingSystem() {
 	s.OS = s.exec("uname", "-m", "-s")
-	return s.OS
 }
 
-func (s *SysInfo) ram() string {
+func (s *SysInfo) ram() {
 	var e error
+	var mb int = 1024 * 1024
 	var phys int
 	var tmp string
 	var total int
-	var used int
 	var user int
+
+	s.RAM = "unknown"
 
 	tmp = s.exec("sysctl", "-n", "hw.physmem")
 	if phys, e = strconv.Atoi(tmp); e != nil {
-		return s.RAM
+		return
 	}
 
 	tmp = s.exec("sysctl", "-n", "hw.usermem")
 	if user, e = strconv.Atoi(tmp); e != nil {
-		return s.RAM
+		return
 	}
 
 	tmp = s.exec("sysctl", "-n", "hw.memsize")
 	if total, e = strconv.Atoi(tmp); e != nil {
-		return s.RAM
+		return
 	}
 
-	used = (phys + user) / (1024 * 1024)
-	total /= 1024 * 1024
-
-	s.RAM = strconv.Itoa(used) + " MB"
-	s.RAM += " / "
-	s.RAM += strconv.Itoa(total) + " MB"
-
-	return s.RAM
+	s.RAM = fmt.Sprintf("%d MB / %d MB", (phys+user)/mb, total/mb)
 }
 
-func (s *SysInfo) shell() string {
-	var exists bool
-	var sh string
+func (s *SysInfo) shell() {
+	s.Shell = "unknown"
 
-	if sh, exists = os.LookupEnv("SHELL"); exists {
+	if sh, ok := os.LookupEnv("SHELL"); ok {
 		s.Shell = strings.TrimSpace(sh)
 	}
-
-	return s.Shell
 }
 
-func (s *SysInfo) tty() string {
-	s.TTY = os.Getenv("GPG_TTY") // There's probably a better way
-	return s.TTY
+func (s *SysInfo) tty() {
+	// There's probably a better way
+	s.TTY = os.Getenv("GPG_TTY")
+	if s.TTY = strings.TrimSpace(s.TTY); s.TTY == "" {
+		s.TTY = "unknown"
+	}
 }
 
-func (s *SysInfo) uptime() string {
-	var r *regexp.Regexp
+func (s *SysInfo) uptime() {
+	var uptime string
 
-	s.Uptime = s.exec("uptime")
+	s.Uptime = "0 mins"
 
 	// Fail fast
-	if s.Uptime == "" {
-		return s.Uptime
+	if uptime = s.exec("uptime"); uptime == "" {
+		return
 	}
 
 	// Strip extra whitespace
-	r = regexp.MustCompile(`\s+`)
-	s.Uptime = r.ReplaceAllString(s.Uptime, " ")
+	uptime = reWhiteSpace.ReplaceAllString(uptime, " ")
 
 	// Strip leading and trailing data
-	r = regexp.MustCompile(`^.*up\s+|,\s+\d+\s+user.+$`)
-	s.Uptime = r.ReplaceAllString(s.Uptime, "")
+	uptime = reUptimeEnds.ReplaceAllString(uptime, "")
 
 	// Convert hours:mins to match days
-	r = regexp.MustCompile(`0?(\d+):0?(\d+)`)
-	s.Uptime = r.ReplaceAllString(s.Uptime, "$1 hour, $2 min")
+	uptime = reHrMin.ReplaceAllString(uptime, "$1 hours, $2 mins")
 
 	// Remove 0 hours and mins
-	r = regexp.MustCompile(`(^|,\s+)0\s+(hour|min)`)
-	s.Uptime = r.ReplaceAllString(s.Uptime, "")
+	uptime = reZeroHrsMins.ReplaceAllString(uptime, "")
 
-	// Make plural if needed
-	r = regexp.MustCompile(`((\d\d+|[2-9])\s+(hour|min))`)
-	s.Uptime = r.ReplaceAllString(s.Uptime, "${1}s")
+	// Make singular, if needed
+	uptime = reOneHrMin.ReplaceAllString(uptime, "${1}1 ${2}")
 
 	// Remove leading and trailing commas or whitespace
-	r = regexp.MustCompile(`^(,?\s*)+|(,?\s*)+$`)
-	s.Uptime = r.ReplaceAllString(s.Uptime, "")
+	uptime = reCommaSpace.ReplaceAllString(uptime, "")
 
-	return s.Uptime
+	if uptime != "" {
+		s.Uptime = uptime
+	}
 }

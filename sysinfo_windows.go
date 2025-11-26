@@ -1,14 +1,14 @@
+//go:build windows
+
 package sysinfo
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strconv"
 	"strings"
-	"unsafe"
 
-	"golang.org/x/sys/windows"
 	"golang.org/x/sys/windows/registry"
 )
 
@@ -26,18 +26,19 @@ type objectAttrs struct {
 	SecurityQualityOfService uintptr
 }
 
-func (s *SysInfo) colors() string {
-	// TODO colors (needs hilighter support)
-	return ""
+func (s *SysInfo) colors() {
+	// Needs hilighter support
+	s.Colors = ""
 }
 
-func (s *SysInfo) cpu() string {
+func (s *SysInfo) cpu() {
+	var cpu string
 	var e error
-	var found bool
 	var k registry.Key
-	var r *regexp.Regexp
 
-	k, found, e = registry.CreateKey(
+	s.CPU = "unknown"
+
+	k, e = registry.OpenKey(
 		registry.LOCAL_MACHINE,
 		filepath.Join(
 			"Hardware",
@@ -48,96 +49,94 @@ func (s *SysInfo) cpu() string {
 		),
 		registry.QUERY_VALUE,
 	)
-	if (e != nil) || !found {
-		return s.CPU
-	}
-
-	s.CPU, _, e = k.GetStringValue("ProcessorNameString")
 	if e != nil {
-		s.CPU = ""
-		return s.CPU
+		return
+	}
+	defer func() {
+		_ = k.Close()
+	}()
+
+	if cpu, _, e = k.GetStringValue("ProcessorNameString"); e != nil {
+		return
 	}
 
-	r = regexp.MustCompile(`\((R|TM)\)| (@|CPU)`)
-	s.CPU = r.ReplaceAllString(s.CPU, "")
-
-	r = regexp.MustCompile(`\s+`)
-	s.CPU = r.ReplaceAllString(s.CPU, " ")
-
-	return s.CPU
+	s.CPU = reCPUBrand.ReplaceAllString(cpu, "")
+	s.CPU = reWhiteSpace.ReplaceAllString(s.CPU, " ")
 }
 
-func (s *SysInfo) filesystems() []string {
-	var out []string
+func (s *SysInfo) filesystems() {
+	var home string = strings.ToLower(os.Getenv("HOMEDRIVE"))
 
-	s.RootFS = s.fsUsage("C:")
-
-	if s.RootFS != "" {
-		out = append(out, s.RootFS)
+	if s.RootFS = s.fsUsage("c:"); s.RootFS == "" {
+		s.RootFS = "unknown"
 	}
 
-	return out
+	if home != "c:" {
+		s.HomeFS = s.fsUsage(home)
+	}
 }
 
 func (s *SysInfo) fsUsage(path string) string {
-	var avail int
+	var cmds []string = []string{
+		fmt.Sprintf(
+			"gcim win32_logicaldisk -filter \"name='%s'\"",
+			path,
+		),
+		"select deviceid,freespace,size",
+	}
+	var cols []string
 	var e error
-	var tmp []string
+	var free int
+	var mb int = 1024 * 1024 * 1024
 	var total int
+	var usage string = s.exec(
+		"powershell",
+		"-c",
+		strings.Join(cmds, "|"),
+	)
 	var used int
 
-	tmp = strings.Split(
-		s.exec(
-			"powershell",
-			"-c",
-			strings.Join(
-				[]string{
-					"gcim Win32_LogicalDisk -Filter \"name='",
-					path,
-					"'\" | select Freespace,Size",
-				},
-				"",
-			),
-		),
-		"\n",
-	)
-	if len(tmp) == 3 {
-		tmp = strings.Fields(tmp[2])
+	path = strings.ToLower(path)
 
-		if len(tmp) == 2 {
-			if avail, e = strconv.Atoi(tmp[0]); e != nil {
+	for _, line := range strings.Split(usage, "\n") {
+		cols = strings.Fields(strings.ToLower(line))
+
+		//nolint:mnd // Validate output format
+		if (len(cols) == 3) && (cols[0] == path) {
+			if free, e = strconv.Atoi(cols[1]); e != nil {
 				return s.RAM
 			}
 
-			if total, e = strconv.Atoi(tmp[1]); e != nil {
+			if total, e = strconv.Atoi(cols[2]); e != nil {
 				return s.RAM
 			}
 
-			avail /= 1024 * 1024 * 1024
-			total /= 1024 * 1024 * 1024
-			used = total - avail
+			free /= mb
+			total /= mb
+			used = total - free
 
-			tmp = []string{
-				strconv.Itoa(used),
-				strconv.Itoa(total),
-				strconv.Itoa(100 * used / total),
-			}
-
-			return tmp[0] + "G / " + tmp[1] + "G (" + tmp[2] + "%)"
+			return fmt.Sprintf(
+				"%dG / %dG (%d%%)",
+				used,
+				total,
+				100*used/total,
+			)
 		}
 	}
 
 	return ""
 }
 
-func (s *SysInfo) kernel() string {
+func (s *SysInfo) kernel() {
+	var build string
 	var e error
-	var found bool
 	var k registry.Key
+	var kernel string
 	var minor uint64
-	var tmp string
 
-	k, found, e = registry.CreateKey(
+	s.Kernel = "unknown"
+
+	k, e = registry.OpenKey(
 		registry.LOCAL_MACHINE,
 		filepath.Join(
 			"Software",
@@ -147,35 +146,38 @@ func (s *SysInfo) kernel() string {
 		),
 		registry.QUERY_VALUE,
 	)
-	if (e != nil) || !found {
-		return s.Kernel
+	if e != nil {
+		return
+	}
+	defer func() {
+		_ = k.Close()
+	}()
+
+	if kernel, _, e = k.GetStringValue("DisplayVersion"); e != nil {
+		return
 	}
 
-	if s.Kernel, _, e = k.GetStringValue("DisplayVersion"); e != nil {
-		s.Kernel = ""
-		return s.Kernel
+	if build, _, e = k.GetStringValue("CurrentBuild"); e != nil {
+		return
 	}
 
-	if tmp, _, e = k.GetStringValue("CurrentBuild"); e != nil {
-		return s.Kernel
-	}
-
-	s.Kernel += " (OS Build " + tmp
+	s.Kernel = kernel + " (OS Build " + build
 
 	if minor, _, e = k.GetIntegerValue("UBR"); e == nil {
-		s.Kernel += "." + strconv.Itoa(int(minor))
+		s.Kernel += fmt.Sprintf(".%d", minor)
 	}
 
 	s.Kernel += ")"
-	return s.Kernel
 }
 
-func (s *SysInfo) operatingSystem() string {
+func (s *SysInfo) operatingSystem() {
 	var e error
-	var found bool
 	var k registry.Key
+	var os string
 
-	k, found, e = registry.CreateKey(
+	s.OS = "Windows"
+
+	k, e = registry.OpenKey(
 		registry.LOCAL_MACHINE,
 		filepath.Join(
 			"Software",
@@ -185,146 +187,128 @@ func (s *SysInfo) operatingSystem() string {
 		),
 		registry.QUERY_VALUE,
 	)
-	if (e != nil) || !found {
-		s.OS = "Windows"
-		return s.OS
+	if e != nil {
+		return
+	}
+	defer func() {
+		_ = k.Close()
+	}()
+
+	if os, _, e = k.GetStringValue("ProductName"); e != nil {
+		return
 	}
 
-	if s.OS, _, e = k.GetStringValue("ProductName"); e != nil {
-		s.OS = "Windows"
-	}
-
-	return s.OS
+	s.OS = os
 }
 
-func (s *SysInfo) ram() string {
-	var avail int
+func (s *SysInfo) ram() {
+	var cmds []string
 	var e error
-	var tmp string
+	var free int
+	var mb int = 1024 * 1024
+	var out string
 	var total int
-	var used int
 
-	tmp = s.exec(
+	s.RAM = "unknown"
+
+	cmds = []string{
+		"get-counter \"\\memory\\available bytes\"",
+		"select -expand countersamples",
+		"select -expand cookedvalue",
+	}
+	out = s.exec(
 		"powershell",
 		"-c",
-		strings.Join(
-			[]string{
-				"(Get-Counter '\\Memory\\Available",
-				"Bytes').CounterSamples.CookedValue",
-			},
-			" ",
-		),
+		strings.Join(cmds, "|"),
 	)
-	if avail, e = strconv.Atoi(tmp); e != nil {
-		return s.RAM
+
+	if free, e = strconv.Atoi(out); e != nil {
+		return
 	}
 
-	tmp = s.exec(
+	cmds = []string{
+		"gcim win32_physicalmemory",
+		"measure -property capacity -sum",
+		"select -expand sum",
+	}
+	out = s.exec(
 		"powershell",
 		"-c",
-		strings.Join(
-			[]string{
-				"(gcim Win32_PhysicalMemory | measure -Property",
-				"capacity -Sum).Sum",
-			},
-			" ",
-		),
+		strings.Join(cmds, "|"),
 	)
-	if total, e = strconv.Atoi(tmp); e != nil {
-		return s.RAM
+
+	if total, e = strconv.Atoi(out); e != nil {
+		return
 	}
 
-	avail /= 1024 * 1024
-	total /= 1024 * 1024
-	used = total - avail
-
-	s.RAM = strconv.Itoa(used) + " MB"
-	s.RAM += " / "
-	s.RAM += strconv.Itoa(total) + " MB"
-
-	return s.RAM
+	s.RAM = fmt.Sprintf("%d MB / %d MB", (total-free)/mb, total/mb)
 }
 
-func (s *SysInfo) shell() string {
-	var err uintptr
-	var lpwstrFilename []uint16 = make([]uint16, 64)
-	var n uintptr
-	var ntdll *windows.LazyDLL = windows.NewLazySystemDLL("ntdll")
-	var pHndl windows.Handle
-	var ppid int = os.Getppid()
-	var psapi *windows.LazyDLL = windows.NewLazySystemDLL("psapi")
+func (s *SysInfo) shell() {
+	var sh string
 
-	err, _, _ = ntdll.NewProc("NtOpenProcess").Call(
-		uintptr(unsafe.Pointer(&pHndl)),
-		uintptr(0x0400), // PROCESS_QUERY_INFORMATION
-		uintptr(unsafe.Pointer(&objectAttrs{0, 0, 0, 0, 0, 0})),
-		uintptr(unsafe.Pointer(&clientID{uintptr(ppid), 0})),
+	s.Shell = "unknown"
+
+	sh = s.exec(
+		"powershell",
+		"-c",
+		fmt.Sprintf("(get-process -id %d).processname", os.Getppid()),
 	)
-	if (err != 0) || (pHndl == 0) {
-		return s.Shell
+	if sh != "" {
+		s.Shell = sh
 	}
-
-	n, _, _ = psapi.NewProc("GetModuleFileNameExW").Call(
-		uintptr(pHndl),
-		0,
-		uintptr(unsafe.Pointer(&lpwstrFilename[0])),
-		64,
-	)
-	if n == 0 {
-		return s.Shell
-	}
-
-	s.Shell = filepath.Base(windows.UTF16ToString(lpwstrFilename[:n]))
-	return s.Shell
 }
 
-func (s *SysInfo) tty() string {
-	return s.TTY
+func (s *SysInfo) tty() {
+	s.TTY = ""
 }
 
-func (s *SysInfo) uptime() string {
+func (s *SysInfo) uptime() {
 	var out string = s.exec(
 		"powershell",
 		"-c",
-		"(date) - (gcim Win32_OperatingSystem).LastBootUpTime",
+		"(date) - (gcim win32_operatingsystem).lastbootuptime",
 	)
-	var tmp []string
+	var stop bool
+	var unit string
 
 	for _, line := range strings.Split(out, "\n") {
-		if strings.HasPrefix(line, "Days") {
-			tmp = strings.Fields(line)
+		unit = ""
 
-			if len(tmp) >= 3 {
-				if tmp[len(tmp)-1] != "0" {
-					s.Uptime = tmp[len(tmp)-1] + " days"
+		switch {
+		case strings.HasPrefix(line, "Days"):
+			unit = "day"
+		case strings.HasPrefix(line, "Hours"):
+			unit = "hour"
+		case strings.HasPrefix(line, "Minutes"):
+			unit = "min"
+			stop = true
+		}
+
+		if unit == "" {
+			continue
+		}
+
+		//nolint:mnd // k : v == 3 fields
+		if tmp := strings.Fields(line); len(tmp) == 3 {
+			if tmp[2] != "0" {
+				if s.Uptime != "" {
+					s.Uptime += ", "
 				}
-			}
-		} else if strings.HasPrefix(line, "Hours") {
-			tmp = strings.Fields(line)
 
-			if len(tmp) >= 3 {
-				if tmp[len(tmp)-1] != "0" {
-					if s.Uptime != "" {
-						s.Uptime += ", "
-					}
-
-					s.Uptime += tmp[len(tmp)-1] + " hours"
-				}
-			}
-		} else if strings.HasPrefix(line, "Minutes") {
-			tmp = strings.Fields(line)
-
-			if len(tmp) >= 3 {
-				if tmp[len(tmp)-1] != "0" {
-					if s.Uptime != "" {
-						s.Uptime += ", "
-					}
-
-					s.Uptime += tmp[len(tmp)-1] + " mins"
+				s.Uptime += tmp[2] + " " + unit
+				if tmp[2] != "1" {
+					s.Uptime += "s"
 				}
 			}
 		}
+
+		if stop {
+			break
+		}
 	}
 
-	return s.Uptime
+	if s.Uptime == "" {
+		s.Uptime = "0 mins"
+	}
 }

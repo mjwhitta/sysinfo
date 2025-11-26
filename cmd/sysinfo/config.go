@@ -11,9 +11,10 @@ import (
 )
 
 type config struct {
-	DataColors  []string `json:"dataColors"`
-	FieldColors []string `json:"fieldColors"`
-	file        string   `json:"-"`
+	DataColors  []string `json:"data_colors"`
+	FieldColors []string `json:"field_colors"`
+
+	file string
 }
 
 var cfg *config
@@ -28,7 +29,7 @@ func init() {
 	}
 
 	fn = filepath.Join(fn, "sysinfo", "rc")
-	b, e = os.ReadFile(fn)
+	b, e = os.ReadFile(filepath.Clean(fn))
 
 	if (e != nil) || (len(bytes.TrimSpace(b)) == 0) {
 		// Default cfg
@@ -38,7 +39,7 @@ func init() {
 			file:        fn,
 		}
 
-		if e = cfg.Save(); e != nil {
+		if e = cfg.save(); e != nil {
 			panic(e)
 		}
 	} else {
@@ -56,9 +57,10 @@ func init() {
 	}
 }
 
-func (c *config) Save() error {
+func (c *config) save() error {
 	var e error
 
+	//nolint:mnd // u=rwx,go=-
 	if e = os.MkdirAll(filepath.Dir(c.file), 0o700); e != nil {
 		return errors.Newf(
 			"failed to create directory %s: %w",
@@ -67,6 +69,7 @@ func (c *config) Save() error {
 		)
 	}
 
+	//nolint:mnd // u=rw,go=-
 	if e = os.WriteFile(c.file, []byte(c.String()), 0o600); e != nil {
 		return errors.Newf("failed to write %s: %w", c.file, e)
 	}
@@ -74,9 +77,11 @@ func (c *config) Save() error {
 	return nil
 }
 
+// String will return a string representation of the config.
 func (c *config) String() string {
 	var b []byte
 
 	b, _ = json.MarshalIndent(&c, "", "  ")
+
 	return strings.TrimSpace(string(b)) + "\n"
 }

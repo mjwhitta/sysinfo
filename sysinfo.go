@@ -15,26 +15,27 @@ import (
 
 // SysInfo is a struct containing relevant system information.
 type SysInfo struct {
-	Colors      string `json:"-"`
-	CPU         string `json:"CPU,omitempty"`
+	Colors string   `json:"-"`
+	CPU    string   `json:"cpu,omitempty"`
+	Height int      `json:"-"`
+	HomeFS string   `json:"homefs,omitempty"`
+	Host   string   `json:"host,omitempty"`
+	IPv4   []string `json:"ipv4,omitempty"`
+	IPv6   []string `json:"ipv6,omitempty"`
+	Kernel string   `json:"kernel,omitempty"`
+	OS     string   `json:"os,omitempty"`
+	RAM    string   `json:"ram,omitempty"`
+	RootFS string   `json:"rootfs,omitempty"`
+	Shell  string   `json:"shell,omitempty"`
+	TTY    string   `json:"tty,omitempty"`
+	Uptime string   `json:"uptime,omitempty"`
+	Width  int      `json:"-"`
+
 	dataColors  []string
 	fieldColors []string
-	Height      int    `json:"-"`
-	HomeFS      string `json:"HomeFS,omitempty"`
-	Host        string `json:"Host,omitempty"`
 	ipMutex     *sync.Mutex
 	ips         map[string][]string
-	IPv4        []string `json:"IPv4,omitempty"`
-	IPv6        []string `json:"IPv6,omitempty"`
-	Kernel      string   `json:"Kernel,omitempty"`
 	order       []string
-	OS          string `json:"OS,omitempty"`
-	RAM         string `json:"RAM,omitempty"`
-	RootFS      string `json:"RootFS,omitempty"`
-	Shell       string `json:"Shell,omitempty"`
-	TTY         string `json:"TTY,omitempty"`
-	Uptime      string `json:"Uptime,omitempty"`
-	Width       int    `json:"-"`
 }
 
 // New will return a SysInfo pointer. A list of fields can be
@@ -49,8 +50,7 @@ func New(fields ...string) *SysInfo {
 			"os",
 			"kernel",
 			"uptime",
-			"ipv4",
-			"ipv6",
+			"ip",
 			"shell",
 			"tty",
 			"cpu",
@@ -99,113 +99,44 @@ func (s *SysInfo) Clear() {
 
 // Collect will get requested system info.
 func (s *SysInfo) Collect() {
+	var collectFuncs map[string]func() = map[string]func(){
+		"blank":  nil,
+		"colors": s.colors,
+		"cpu":    s.cpu,
+		"fs":     s.filesystems,
+		"host":   s.hostname,
+		"ip":     s.ipAddresses,
+		"kernel": s.kernel,
+		"os":     s.operatingSystem,
+		"ram":    s.ram,
+		"shell":  s.shell,
+		"tty":    s.tty,
+		"uptime": s.uptime,
+	}
 	var newOrder []string
 	var wg sync.WaitGroup
 
 	for _, field := range s.order {
-		switch strings.ToLower(field) {
-		case "blank":
-			newOrder = append(newOrder, "Blank")
-		case "colors":
-			newOrder = append(newOrder, "Colors")
+		field = strings.ToLower(field)
+
+		if collect, ok := collectFuncs[field]; ok {
+			newOrder = append(newOrder, field)
+
+			if collect == nil {
+				continue
+			}
 
 			wg.Add(1)
-			go func() {
-				s.colors()
-				wg.Done()
-			}()
-		case "cpu":
-			newOrder = append(newOrder, "CPU")
 
-			wg.Add(1)
-			go func() {
-				s.cpu()
+			go func(f func()) {
+				f()
 				wg.Done()
-			}()
-		case "fs":
-			newOrder = append(newOrder, "FS")
-
-			wg.Add(1)
-			go func() {
-				s.filesystems()
-				wg.Done()
-			}()
-		case "host":
-			newOrder = append(newOrder, "Host")
-
-			wg.Add(1)
-			go func() {
-				s.hostname()
-				wg.Done()
-			}()
-		case "ipv4":
-			newOrder = append(newOrder, "IPv4")
-
-			wg.Add(1)
-			go func() {
-				s.ipv4()
-				wg.Done()
-			}()
-		case "ipv6":
-			newOrder = append(newOrder, "IPv6")
-
-			wg.Add(1)
-			go func() {
-				s.ipv6()
-				wg.Done()
-			}()
-		case "kernel":
-			newOrder = append(newOrder, "Kernel")
-
-			wg.Add(1)
-			go func() {
-				s.kernel()
-				wg.Done()
-			}()
-		case "os":
-			newOrder = append(newOrder, "OS")
-
-			wg.Add(1)
-			go func() {
-				s.operatingSystem()
-				wg.Done()
-			}()
-		case "ram":
-			newOrder = append(newOrder, "RAM")
-
-			wg.Add(1)
-			go func() {
-				s.ram()
-				wg.Done()
-			}()
-		case "shell":
-			newOrder = append(newOrder, "Shell")
-
-			wg.Add(1)
-			go func() {
-				s.shell()
-				wg.Done()
-			}()
-		case "tty":
-			newOrder = append(newOrder, "TTY")
-
-			wg.Add(1)
-			go func() {
-				s.tty()
-				wg.Done()
-			}()
-		case "uptime":
-			newOrder = append(newOrder, "Uptime")
-
-			wg.Add(1)
-			go func() {
-				s.uptime()
-				wg.Done()
-			}()
+			}(collect)
 		}
 	}
 
 	s.order = newOrder
+
 	wg.Wait()
 	s.calcSize()
 }
@@ -225,19 +156,16 @@ func (s *SysInfo) exec(cmd string, cli ...string) string {
 	return strings.TrimSpace(string(o))
 }
 
-func (s *SysInfo) format(k string, v string, max int) string {
-	var filler string
-	var line string
+func (s *SysInfo) format(k string, v string, maxWidth int) string {
+	var filler string = strings.Repeat(" ", maxWidth-len(k)+1)
+	var sb strings.Builder
 
-	for range max - len(k) {
-		filler += " "
-	}
+	sb.WriteString(filler)
+	sb.WriteString(hl.Hilights(s.fieldColors, k+":"))
+	sb.WriteString(" ")
+	sb.WriteString(hl.Hilights(s.dataColors, v))
 
-	line = " " + hl.Hilights(s.fieldColors, filler+k+":")
-	line += " "
-	line += hl.Hilights(s.dataColors, v)
-
-	return line
+	return sb.String()
 }
 
 func (s *SysInfo) getIPs() map[string][]string {
@@ -291,17 +219,19 @@ func (s *SysInfo) getIPs() map[string][]string {
 	return s.ips
 }
 
-func (s *SysInfo) hostname() string {
-	var e error
-
-	if s.Host, e = os.Hostname(); e != nil {
-		s.Host = ""
+func (s *SysInfo) hostname() {
+	s.Host = ""
+	if host, e := os.Hostname(); e == nil {
+		s.Host = strings.TrimSpace(host)
 	}
-
-	return s.Host
 }
 
-func (s *SysInfo) ipv4() []string {
+func (s *SysInfo) ipAddresses() {
+	s.ipv4()
+	s.ipv6()
+}
+
+func (s *SysInfo) ipv4() {
 	var ip net.IP
 	var tmp string
 
@@ -320,10 +250,9 @@ func (s *SysInfo) ipv4() []string {
 	}
 
 	sort.Strings(s.IPv4)
-	return s.IPv4
 }
 
-func (s *SysInfo) ipv6() []string {
+func (s *SysInfo) ipv6() {
 	var ip net.IP
 	var tmp string
 
@@ -342,7 +271,6 @@ func (s *SysInfo) ipv6() []string {
 	}
 
 	sort.Strings(s.IPv6)
-	return s.IPv6
 }
 
 // SetDataColors will set the color values for the field data. See
@@ -360,8 +288,7 @@ func (s *SysInfo) SetFieldColors(colors ...string) {
 // String will return a string representation of the SysInfo.
 func (s *SysInfo) String() string {
 	var data map[string]string = map[string]string{}
-	var hasKey bool
-	var max int
+	var maxWidth int
 	var out []string
 	var tmp []byte
 
@@ -369,40 +296,59 @@ func (s *SysInfo) String() string {
 	_ = json.Unmarshal(tmp, &data)
 
 	for k := range data {
-		if len(k) > max {
-			max = len(k)
+		if len(k) > maxWidth {
+			maxWidth = len(k)
 		}
 	}
 
 	for _, field := range s.order {
 		switch field {
-		case "Blank":
+		case "blank":
 			out = append(out, "")
-		case "Colors":
+		case "colors":
 			if s.Colors != "" {
 				out = append(out, " "+s.Colors)
 			}
-		case "FS":
-			field = "RootFS"
-			if _, hasKey = data[field]; hasKey {
-				out = append(out, s.format(field, data[field], max))
+		case "fs":
+			field = "rootfs"
+			if _, ok := data[field]; ok {
+				out = append(
+					out,
+					s.format(titleCase[field], data[field], maxWidth),
+				)
 			}
 
-			field = "HomeFS"
-			if _, hasKey = data[field]; hasKey {
-				out = append(out, s.format(field, data[field], max))
+			field = "homefs"
+			if _, ok := data[field]; ok {
+				out = append(
+					out,
+					s.format(titleCase[field], data[field], maxWidth),
+				)
 			}
-		case "IPv4":
+		case "ip":
+			field = "ipv4"
+
 			for _, ip := range s.IPv4 {
-				out = append(out, s.format(field, ip, max))
+				out = append(
+					out,
+					s.format(titleCase[field], ip, maxWidth),
+				)
 			}
-		case "IPv6":
+
+			field = "ipv6"
+
 			for _, ip := range s.IPv6 {
-				out = append(out, s.format(field, ip, max))
+				out = append(
+					out,
+					s.format(titleCase[field], ip, maxWidth),
+				)
 			}
 		default:
-			if _, hasKey = data[field]; hasKey {
-				out = append(out, s.format(field, data[field], max))
+			if _, ok := data[field]; ok {
+				out = append(
+					out,
+					s.format(titleCase[field], data[field], maxWidth),
+				)
 			}
 		}
 	}
