@@ -3,7 +3,7 @@ package sysinfo
 import "regexp"
 
 // Version is the package version
-const Version string = "1.7.0"
+const Version string = "1.7.1"
 
 var (
 	reCommaSpace *regexp.Regexp = regexp.MustCompile(
@@ -32,7 +32,7 @@ var (
 	)
 	reWhiteSpace  *regexp.Regexp = regexp.MustCompile(`\s+`)
 	reZeroHrsMins *regexp.Regexp = regexp.MustCompile(
-		`(^|,\s+)0\s+(hour|min)`,
+		`(^|,\s+)0\s+(hour|min)s`,
 	)
 	titleCase map[string]string = map[string]string{
 		"cpu":    "CPU",
