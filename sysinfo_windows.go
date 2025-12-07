@@ -289,7 +289,7 @@ func (s *SysInfo) uptime() {
 			continue
 		}
 
-		//nolint:mnd // k : v == 3 fields
+		//nolint:mnd // Unit : value == 3 fields
 		if tmp := strings.Fields(line); len(tmp) == 3 {
 			if tmp[2] != "0" {
 				if s.Uptime != "" {
