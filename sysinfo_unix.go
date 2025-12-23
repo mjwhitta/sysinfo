@@ -45,7 +45,11 @@ func (s *SysInfo) cpu() {
 
 	m = reModelName.FindAllStringSubmatch(string(info), -1)
 	if len(m) > 0 {
-		s.CPU = reCPUBrand.ReplaceAllString(m[0][2], "")
+		s.CPU = fmt.Sprintf(
+			"%s x %d",
+			reCPUBrand.ReplaceAllString(m[0][2], ""),
+			len(m),
+		)
 		s.CPU = reWhiteSpace.ReplaceAllString(s.CPU, " ")
 	}
 }

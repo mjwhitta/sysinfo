@@ -3,7 +3,7 @@ package sysinfo
 import "regexp"
 
 // Version is the package version
-const Version string = "1.7.3"
+const Version string = "1.7.4"
 
 var (
 	reCommaSpace *regexp.Regexp = regexp.MustCompile(
