@@ -132,6 +132,11 @@ func (s *SysInfo) uptime() {
 	// Strip leading and trailing data
 	uptime = reUptimeEnds.ReplaceAllString(uptime, "")
 
+	// Make plural, if not already
+	if strings.HasSuffix(uptime, "min") {
+		uptime += "s"
+	}
+
 	// Convert hours:mins to match days
 	uptime = reHrMin.ReplaceAllString(uptime, "$1 hours, $2 mins")
 
