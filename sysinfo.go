@@ -149,6 +149,7 @@ func (s *SysInfo) exec(cmd string, cli ...string) string {
 		return ""
 	}
 
+	//nolint:gosec // G204 - That's the whole point
 	if o, e = exec.Command(cmd, cli...).Output(); e != nil {
 		return ""
 	}
@@ -178,7 +179,7 @@ func (s *SysInfo) getIPs() map[string][]string {
 	s.ipMutex.Lock()
 	defer s.ipMutex.Unlock()
 
-	if (s.ips != nil) && (len(s.ips) > 0) {
+	if len(s.ips) > 0 {
 		return s.ips
 	}
 
